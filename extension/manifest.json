@@ -21,7 +21,7 @@
     "https://*.ingest.sentry.io/*"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.ingest.sentry.io"
+    "extension_pages": "script-src 'self' https://www.googletagmanager.com; object-src 'self'; connect-src 'self' https://*.ingest.sentry.io https://www.google-analytics.com https://region1.google-analytics.com"
   },
   "content_scripts": [
     {
