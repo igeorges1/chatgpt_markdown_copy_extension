@@ -1,80 +1,46 @@
-(function() {
-    'use strict';
+// Content Script
+// Dependencies (SENTRY_CONFIG, sentry-helper functions) are loaded globally via manifest.json
+// content_scripts order: sentry.min.js -> sentry-config.js -> sentry-helper.js -> content.js
 
-    // Helper function to safely capture Sentry events
-    function captureSentryException(error, context = {}) {
-        if (typeof Sentry !== 'undefined' && Sentry.captureException) {
-            try {
-                Sentry.captureException(error, {
-                    tags: {
-                        platform: currentPlatform || 'unknown',
-                        ...context.tags
-                    },
-                    extra: context.extra || {}
-                });
-            } catch (sentryError) {
-                console.error('[Sentry] Failed to capture exception:', sentryError);
-            }
-        }
+// Add global variables at the beginning of script
+let observer = null;
+const processingQueue = new Set();
+let processTimeout = null;
+
+// Detect current platform
+function detectPlatform() {
+    const hostname = window.location.hostname;
+    if (hostname.includes('chatgpt.com') || hostname.includes('openai.com')) {
+        return 'chatgpt';
+    } else if (hostname.includes('gemini.google.com')) {
+        return 'gemini';
     }
+    return null;
+}
 
-    function captureSentryMessage(message, level = 'info', context = {}) {
-        if (typeof Sentry !== 'undefined' && Sentry.captureMessage) {
-            try {
-                Sentry.captureMessage(message, {
-                    level: level,
-                    tags: {
-                        platform: currentPlatform || 'unknown',
-                        ...context.tags
-                    },
-                    extra: context.extra || {}
-                });
-            } catch (sentryError) {
-                console.error('[Sentry] Failed to capture message:', sentryError);
-            }
-        }
+// Default platform configuration
+const DEFAULT_PLATFORM_CONFIG = {
+    chatgpt: {
+        messageSelector: '[data-testid^="conversation-turn"]',
+        buttonContainerSelector: '.flex.flex-wrap.items-center',
+        copyButtonSelector: '[aria-label="Copy"]',
+        contentSelector: '.markdown.prose',
+        getButtonContainer: (copyButton) => copyButton.parentNode
+    },
+    gemini: {
+        messageSelector: 'message-content',
+        buttonContainerSelector: 'copy-button',
+        copyButtonSelector: 'button[aria-label="Copy"]',
+        contentSelector: '.markdown',
+        getButtonContainer: (copyButton) => copyButton.closest('copy-button')
     }
+};
 
-    // Add global variables at the beginning of script
-    let observer = null;
-    const processingQueue = new Set();
-    let processTimeout = null;
-
-    // Detect current platform
-    function detectPlatform() {
-        const hostname = window.location.hostname;
-        if (hostname.includes('chatgpt.com') || hostname.includes('openai.com')) {
-            return 'chatgpt';
-        } else if (hostname.includes('gemini.google.com')) {
-            return 'gemini';
-        }
-        return null;
-    }
-
-    // Default platform configuration
-    const DEFAULT_PLATFORM_CONFIG = {
-        chatgpt: {
-            messageSelector: '[data-testid^="conversation-turn"]',
-            buttonContainerSelector: '.flex.flex-wrap.items-center',
-            copyButtonSelector: '[aria-label="Copy"]',
-            contentSelector: '.markdown.prose',
-            getButtonContainer: (copyButton) => copyButton.parentNode
-        },
-        gemini: {
-            messageSelector: 'message-content',
-            buttonContainerSelector: 'copy-button',
-            copyButtonSelector: 'button[aria-label="Copy"]',
-            contentSelector: '.markdown',
-            getButtonContainer: (copyButton) => copyButton.closest('copy-button')
-        }
-    };
-
-    const currentPlatform = detectPlatform();
+const currentPlatform = detectPlatform();
     if (!currentPlatform) {
-        console.log('Unsupported platform');
-        return;
-    }
-    console.log('current platform', currentPlatform);
+        logInfo('Unsupported platform');
+    } else {
+        logInfo('current platform', currentPlatform);
 
     // Global config variable (will be loaded from storage)
     let config = null;
@@ -98,15 +64,15 @@
                     getButtonContainer: defaultSelectors.getButtonContainer
                 };
 
-                console.log('[Markdown Copy] Loaded config:', config);
-                console.log('[Markdown Copy] Debug options:', debugOptions);
+                logInfo('[Markdown Copy] Loaded config:', config);
+                logInfo('[Markdown Copy] Debug options:', debugOptions);
 
                 if (callback) callback();
             });
         } else {
             // Fallback if chrome.storage is not available
             config = DEFAULT_PLATFORM_CONFIG[currentPlatform];
-            console.log('[Markdown Copy] Using default config (storage not available)');
+            logInfo('[Markdown Copy] Using default config (storage not available)');
             if (callback) callback();
         }
     }
@@ -290,29 +256,29 @@
 
         // Check if processing or already processed
         if (processingQueue.has(containerId)) {
-            console.log('[addMarkdownCopyButton] Skipping - already in processing queue:', containerId);
+            logDebug('[addMarkdownCopyButton] Skipping - already in processing queue:', containerId);
             return;
         }
 
         // Check if button already added
         if (buttonContainer.querySelector('[data-markdown-copy="true"]')) {
-            console.log('[addMarkdownCopyButton] Skipping - markdown button already exists');
+            logDebug('[addMarkdownCopyButton] Skipping - markdown button already exists');
             return;
         }
 
         // For Gemini, additionally check if next sibling is our button
         if (currentPlatform === 'gemini' && buttonContainer.nextElementSibling?.hasAttribute('data-markdown-copy')) {
-            console.log('[addMarkdownCopyButton] Skipping - Gemini button already exists');
+            logDebug('[addMarkdownCopyButton] Skipping - Gemini button already exists');
             return;
         }
 
         const copyButton = buttonContainer.querySelector(config.copyButtonSelector);
         if (!copyButton) {
-            console.log('[addMarkdownCopyButton] Copy button not found, selector:', config.copyButtonSelector);
+            logDebug('[addMarkdownCopyButton] Copy button not found, selector:', config.copyButtonSelector);
             return;
         }
 
-        console.log('[addMarkdownCopyButton] Adding markdown copy button to container:', containerId);
+        logInfo('[addMarkdownCopyButton] Adding markdown copy button to container:', containerId);
 
         // Mark as processing
         processingQueue.add(containerId);
@@ -398,7 +364,7 @@
 
         // Add click event
         mdButton.addEventListener('click', async () => {
-            console.log('on click');
+            logDebug('on click');
             let markdownContent;
 
             if (currentPlatform === 'chatgpt') {
@@ -417,7 +383,7 @@
             if (markdownContent) {
                 try {
                     const markdown = htmlToMarkdown(markdownContent);
-                    console.log(markdown);
+                    logDebug(markdown);
 
                     try {
                         await navigator.clipboard.writeText(markdown);
@@ -446,32 +412,14 @@
                             }, 1000);
                         }
                     } catch (err) {
-                        console.error('Failed to copy to clipboard:', err);
-                        captureSentryException(err, {
-                            tags: { operation: 'clipboard_write' },
-                            extra: { markdownLength: markdown.length }
-                        });
+                        logError('Failed to copy to clipboard:', err);
                     }
                 } catch (err) {
-                    console.error('Failed to convert to markdown:', err);
-                    captureSentryException(err, {
-                        tags: { operation: 'markdown_conversion' },
-                        extra: {
-                            hasContent: !!markdownContent,
-                            contentType: markdownContent?.tagName
-                        }
-                    });
+                    logError('Failed to convert to markdown:', err);
                 }
             } else {
                 const errorMsg = "Can't find message body";
-                console.error(errorMsg);
-                captureSentryMessage(errorMsg, 'warning', {
-                    tags: { operation: 'find_content' },
-                    extra: {
-                        buttonContainerExists: !!buttonContainer,
-                        platform: currentPlatform
-                    }
-                });
+                logError(errorMsg);
             }
         });
 
@@ -496,22 +444,22 @@
         }
 
         processTimeout = setTimeout(() => {
-            console.log('[processExistingMessages] Starting to process messages...');
+            logInfo('[processExistingMessages] Starting to process messages...');
 
             if (currentPlatform === 'chatgpt') {
                 // Try multiple selector strategies for better coverage
                 const containers = document.querySelectorAll(`${config.messageSelector} ${config.buttonContainerSelector}`);
-                console.log(`[processExistingMessages] Found ${containers.length} button containers using primary selector`);
+                logInfo(`[processExistingMessages] Found ${containers.length} button containers using primary selector`);
 
                 // If no containers found, try finding copy buttons directly
                 if (containers.length === 0) {
                     const copyButtons = document.querySelectorAll(config.copyButtonSelector);
-                    console.log(`[processExistingMessages] Fallback: Found ${copyButtons.length} copy buttons`);
+                    logInfo(`[processExistingMessages] Fallback: Found ${copyButtons.length} copy buttons`);
 
                     copyButtons.forEach(copyButton => {
                         const container = config.getButtonContainer(copyButton);
                         if (container && container.closest(config.messageSelector)) {
-                            console.log('[processExistingMessages] Adding button to container found via copy button');
+                            logInfo('[processExistingMessages] Adding button to container found via copy button');
                             addMarkdownCopyButton(container);
                         }
                     });
@@ -522,13 +470,13 @@
                 }
             } else if (currentPlatform === 'gemini') {
                 const copyButtons = document.querySelectorAll(config.buttonContainerSelector);
-                console.log(`[processExistingMessages] Found ${copyButtons.length} Gemini copy buttons`);
+                logInfo(`[processExistingMessages] Found ${copyButtons.length} Gemini copy buttons`);
                 copyButtons.forEach(button => {
                     addMarkdownCopyButton(button);
                 });
             }
 
-            console.log('[processExistingMessages] Processing complete');
+            logInfo('[processExistingMessages] Processing complete');
             processTimeout = null;
         }, 300); // 300ms debounce delay
     }
@@ -589,14 +537,14 @@
                                         // Check for message container
                                         if (node.matches?.(config.messageSelector) ||
                                             node.querySelector?.(config.messageSelector)) {
-                                            console.log('[MutationObserver] Detected new message container');
+                                            logDebug('[MutationObserver] Detected new message container');
                                             hasNewButtons = true;
                                             break;
                                         }
                                         // Also check for copy button directly (handles incremental rendering)
                                         if (node.matches?.(config.copyButtonSelector) ||
                                             node.querySelector?.(config.copyButtonSelector)) {
-                                            console.log('[MutationObserver] Detected new copy button');
+                                            logDebug('[MutationObserver] Detected new copy button');
                                             hasNewButtons = true;
                                             break;
                                         }
@@ -605,7 +553,7 @@
                                             node.querySelector?.(config.buttonContainerSelector)) {
                                             // Verify it's within a message container
                                             if (node.closest?.(config.messageSelector)) {
-                                                console.log('[MutationObserver] Detected new button container in message');
+                                                logDebug('[MutationObserver] Detected new button container in message');
                                                 hasNewButtons = true;
                                                 break;
                                             }
@@ -615,7 +563,7 @@
                                     if (currentPlatform === 'gemini' &&
                                         (node.matches?.(config.buttonContainerSelector) ||
                                          node.querySelector?.(config.buttonContainerSelector))) {
-                                        console.log('[MutationObserver] Detected new Gemini copy button');
+                                        logDebug('[MutationObserver] Detected new Gemini copy button');
                                         hasNewButtons = true;
                                         break;
                                     }
@@ -630,7 +578,7 @@
                                     // Check if the attribute change is on a message container
                                     if (target.matches?.(config.messageSelector) ||
                                         target.querySelector?.(config.messageSelector)) {
-                                        console.log('[MutationObserver] Detected attribute change on message container');
+                                        logDebug('[MutationObserver] Detected attribute change on message container');
                                         hasNewButtons = true;
                                         break;
                                     }
@@ -644,10 +592,7 @@
                         processExistingMessages();
                     }
                 } catch (error) {
-                    console.error('[MutationObserver] Error:', error);
-                    captureSentryException(error, {
-                        tags: { operation: 'mutation_observer' }
-                    });
+                    logError('[MutationObserver] Error:', error);
                 }
             });
 
@@ -662,7 +607,7 @@
                 attributeFilter: ['data-testid', 'class', 'aria-label', 'hidden', 'style']
             });
 
-            console.log(`Markdown Copy initialized for ${currentPlatform}`);
+            logInfo(`Markdown Copy initialized for ${currentPlatform}`);
 
             // Report successful initialization
             if (typeof Sentry !== 'undefined' && Sentry.addBreadcrumb) {
@@ -674,11 +619,7 @@
                 });
             }
         } catch (error) {
-            console.error('[Init] Failed to initialize extension:', error);
-            captureSentryException(error, {
-                tags: { operation: 'initialization' },
-                extra: { platform: currentPlatform }
-            });
+            logError('[Init] Failed to initialize extension:', error);
         }
     }
 
@@ -689,9 +630,27 @@
             init();
         });
     } catch (error) {
-        console.error('[Main] Failed to start extension:', error);
-        captureSentryException(error, {
-            tags: { operation: 'startup' }
-        });
+        logError('[Main] Failed to start extension:', error);
     }
-})();
+}
+
+// Debug helper: allow triggering a Sentry test event from the extension (optional)
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+    try {
+        chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+            if (message && message.action === 'testSentry') {
+                try {
+                    throw new Error('[Markdown Copy] Sentry test exception from content script');
+                } catch (err) {
+                    console.warn('Triggering Sentry test exception');
+                    captureSentryException(err, {
+                        tags: { operation: 'test_exception' },
+                        extra: { platform: currentPlatform }
+                    });
+                }
+            }
+        });
+    } catch (e) {
+        console.warn('[Markdown Copy] Failed to attach testSentry listener', e);
+    }
+}

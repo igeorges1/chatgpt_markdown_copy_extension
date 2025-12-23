@@ -1,8 +1,7 @@
-(function() {
-    'use strict';
+// ES Module - Options Page
 
-    // Default selectors (same as in content.js)
-    const DEFAULT_SELECTORS = {
+// Default selectors (same as in content.js)
+const DEFAULT_SELECTORS = {
         chatgpt: {
             messageSelector: '[data-testid^="conversation-turn"]',
             buttonContainerSelector: '.flex.flex-wrap.items-center',
@@ -14,11 +13,11 @@
             buttonContainerSelector: 'copy-button',
             copyButtonSelector: 'button[aria-label="Copy"]',
             contentSelector: '.markdown'
-        }
-    };
+    }
+};
 
-    // DOM elements
-    const elements = {
+// DOM elements
+const elements = {
         // Feedback
         feedbackType: document.getElementById('feedback-type'),
         feedbackText: document.getElementById('feedback-text'),
@@ -52,11 +51,11 @@
         enableSentry: document.getElementById('enable-sentry'),
         enableDomSnapshot: document.getElementById('enable-dom-snapshot'),
         saveDebug: document.getElementById('save-debug'),
-        debugStatus: document.getElementById('debug-status')
-    };
+    debugStatus: document.getElementById('debug-status')
+};
 
-    // Show status message
-    function showStatus(element, message, type = 'success', duration = 3000) {
+// Show status message
+function showStatus(element, message, type = 'success', duration = 3000) {
         element.textContent = message;
         element.className = `status-message ${type}`;
         element.style.display = 'block';
@@ -65,11 +64,11 @@
             setTimeout(() => {
                 element.style.display = 'none';
             }, duration);
-        }
     }
+}
 
-    // Load settings from storage
-    function loadSettings() {
+// Load settings from storage
+function loadSettings() {
         chrome.storage.sync.get(['customSelectors', 'debugOptions'], (result) => {
             const selectors = result.customSelectors || {};
             const debugOptions = result.debugOptions || {};
@@ -95,10 +94,10 @@
             // Set placeholders as default values
             setPlaceholdersAsDefaults();
         });
-    }
+}
 
-    // Set placeholders to show default values
-    function setPlaceholdersAsDefaults() {
+// Set placeholders to show default values
+function setPlaceholdersAsDefaults() {
         elements.chatgptMessage.placeholder = DEFAULT_SELECTORS.chatgpt.messageSelector;
         elements.chatgptButtonContainer.placeholder = DEFAULT_SELECTORS.chatgpt.buttonContainerSelector;
         elements.chatgptCopyButton.placeholder = DEFAULT_SELECTORS.chatgpt.copyButtonSelector;
@@ -107,11 +106,11 @@
         elements.geminiMessage.placeholder = DEFAULT_SELECTORS.gemini.messageSelector;
         elements.geminiButtonContainer.placeholder = DEFAULT_SELECTORS.gemini.buttonContainerSelector;
         elements.geminiCopyButton.placeholder = DEFAULT_SELECTORS.gemini.copyButtonSelector;
-        elements.geminiContent.placeholder = DEFAULT_SELECTORS.gemini.contentSelector;
-    }
+    elements.geminiContent.placeholder = DEFAULT_SELECTORS.gemini.contentSelector;
+}
 
-    // Save selector settings
-    function saveSelectors() {
+// Save selector settings
+function saveSelectors() {
         const customSelectors = {
             chatgpt: {
                 messageSelector: elements.chatgptMessage.value.trim() || DEFAULT_SELECTORS.chatgpt.messageSelector,
@@ -134,10 +133,10 @@
                 showStatus(elements.selectorStatus, 'Settings saved! Please refresh ChatGPT/Gemini pages.', 'success');
             }
         });
-    }
+}
 
-    // Reset to default selectors
-    function resetSelectors() {
+// Reset to default selectors
+function resetSelectors() {
         if (!confirm('Reset all selectors to default values?')) {
             return;
         }
@@ -146,10 +145,10 @@
             loadSettings();
             showStatus(elements.selectorStatus, 'Reset to default values. Please refresh ChatGPT/Gemini pages.', 'success');
         });
-    }
+}
 
-    // Test selectors
-    function testSelectors() {
+// Test selectors
+function testSelectors() {
         const platform = prompt('Which platform to test? (chatgpt/gemini)');
         if (!platform || !['chatgpt', 'gemini'].includes(platform.toLowerCase())) {
             showStatus(elements.selectorStatus, 'Invalid platform. Enter "chatgpt" or "gemini".', 'error');
@@ -173,10 +172,10 @@
                 });
             }, 3000);
         });
-    }
+}
 
-    // Generate issue body for preview and submission
-    function generateIssueBody() {
+// Generate issue body for preview and submission
+function generateIssueBody() {
         const text = elements.feedbackText.value.trim();
         const email = elements.contactEmail.value.trim();
 
@@ -207,23 +206,23 @@
             issueBody += `- Platform: ${info.platform}\n`;
         }
 
-        return issueBody;
-    }
+    return issueBody;
+}
 
-    // Update preview
-    function updatePreview() {
+// Update preview
+function updatePreview() {
         const issueBody = generateIssueBody();
 
         if (issueBody && elements.includeInfo.checked) {
             elements.previewContent.textContent = issueBody;
             elements.feedbackPreview.style.display = 'block';
         } else {
-            elements.feedbackPreview.style.display = 'none';
-        }
+        elements.feedbackPreview.style.display = 'none';
     }
+}
 
-    // Submit feedback
-    function submitFeedback() {
+// Submit feedback
+function submitFeedback() {
         const type = elements.feedbackType.value;
         const text = elements.feedbackText.value.trim();
 
@@ -246,17 +245,17 @@
         // Clear form
         elements.feedbackText.value = '';
         elements.contactEmail.value = '';
-        updatePreview();
-        showStatus(elements.feedbackStatus, 'Opening GitHub to submit your feedback...', 'success');
-    }
+    updatePreview();
+    showStatus(elements.feedbackStatus, 'Opening GitHub to submit your feedback...', 'success');
+}
 
-    // Open GitHub issues page
-    function openGitHub() {
-        window.open('https://github.com/bugparty/chatgpt_markdown_copy_extension/issues', '_blank');
-    }
+// Open GitHub issues page
+function openGitHub() {
+    window.open('https://github.com/bugparty/chatgpt_markdown_copy_extension/issues', '_blank');
+}
 
-    // Save debug options
-    function saveDebugOptions() {
+// Save debug options
+function saveDebugOptions() {
         const debugOptions = {
             enableSentry: elements.enableSentry.checked,
             enableDomSnapshot: elements.enableDomSnapshot.checked
@@ -269,10 +268,10 @@
                 showStatus(elements.debugStatus, 'Debug options saved! Please refresh ChatGPT/Gemini pages.', 'success');
             }
         });
-    }
+}
 
-    // Event listeners
-    elements.saveSelectors.addEventListener('click', saveSelectors);
+// Event listeners
+elements.saveSelectors.addEventListener('click', saveSelectors);
     elements.resetSelectors.addEventListener('click', resetSelectors);
     elements.testSelectors.addEventListener('click', testSelectors);
     elements.submitFeedback.addEventListener('click', submitFeedback);
@@ -282,13 +281,11 @@
     // Feedback preview listeners
     elements.feedbackText.addEventListener('input', updatePreview);
     elements.contactEmail.addEventListener('input', updatePreview);
-    elements.includeInfo.addEventListener('change', updatePreview);
-    elements.feedbackType.addEventListener('change', updatePreview);
+elements.includeInfo.addEventListener('change', updatePreview);
+elements.feedbackType.addEventListener('change', updatePreview);
 
-    // Load settings on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        loadSettings();
-        updatePreview(); // Show preview on load if checkbox is checked
-    });
-
-})();
+// Load settings on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+    updatePreview(); // Show preview on load if checkbox is checked
+});

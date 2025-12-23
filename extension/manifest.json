@@ -18,10 +18,22 @@
     "open_in_tab": true
   },
   "host_permissions": [
-    "https://*.ingest.sentry.io/*"
+    "https://*.ingest.sentry.io/*",
+    "https://*.ingest.us.sentry.io/*",
+    "https://o157982.ingest.us.sentry.io/*"
+  ],
+  "background": { 
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["sentry10.32.1.global.js", "sentry-config.js", "id.js"],
+      "matches": ["<all_urls>"]
+    }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.ingest.sentry.io"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://o157982.ingest.us.sentry.io"
   },
   "content_scripts": [
     {
@@ -30,7 +42,7 @@
         "https://chat.openai.com/*",
         "https://gemini.google.com/*"
       ],
-      "js": ["sentry.min.js", "sentry-config.js", "content.js"],
+      "js": [ "sentry-config.js", "sentry-helper.js", "content.js"],
       "run_at": "document_end"
     }
   ],

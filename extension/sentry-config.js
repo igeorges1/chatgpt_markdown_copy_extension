@@ -2,7 +2,7 @@
 // Replace SENTRY_DSN with your actual Sentry DSN
 // Get your DSN from: https://sentry.io/settings/projects/
 
-const SENTRY_CONFIG = {
+const SENTRY_CONFIG_OBJ = {
     // REQUIRED: Set your Sentry DSN here
     // Example: 'https://examplePublicKey@o0.ingest.sentry.io/0'
     dsn: 'https://05cb409834d55523fe1f68bc5e4ea795@o157982.ingest.us.sentry.io/4510368527089664',
@@ -28,55 +28,13 @@ const SENTRY_CONFIG = {
     }
 };
 
-// Initialize Sentry if DSN is configured
-if (typeof Sentry !== 'undefined' && SENTRY_CONFIG.dsn && SENTRY_CONFIG.dsn !== 'YOUR_SENTRY_DSN_HERE') {
-    try {
-        Sentry.init({
-            dsn: SENTRY_CONFIG.dsn,
-            environment: SENTRY_CONFIG.environment,
-            release: SENTRY_CONFIG.release,
-            tracesSampleRate: SENTRY_CONFIG.tracesSampleRate,
-
-            // Capture unhandled promise rejections
-            integrations: [
-                Sentry.browserTracingIntegration(),
-            ],
-
-            // Filter out sensitive information
-            beforeSend(event, _hint) {
-                // Don't send events if user hasn't configured DSN
-                if (!SENTRY_CONFIG.dsn || SENTRY_CONFIG.dsn === 'YOUR_SENTRY_DSN_HERE') {
-                    return null;
-                }
-
-                // Add custom tags
-                event.tags = { ...event.tags, ...SENTRY_CONFIG.tags };
-
-                // Filter out clipboard data from breadcrumbs
-                if (event.breadcrumbs) {
-                    event.breadcrumbs = event.breadcrumbs.filter(breadcrumb => {
-                        return !breadcrumb.message?.includes('clipboard');
-                    });
-                }
-
-                return event;
-            },
-
-            // Set context
-            initialScope: {
-                tags: SENTRY_CONFIG.tags,
-                user: {
-                    // Don't track user IDs for privacy
-                    // Just track browser info
-                    browser: navigator.userAgent
-                }
-            }
-        });
-
-        console.log('[Sentry] Initialized successfully');
-    } catch (error) {
-        console.error('[Sentry] Initialization failed:', error);
-    }
-} else {
-    console.log('[Sentry] Not initialized - DSN not configured');
+// Export for both Content Scripts (global) and Modules (globalThis/self)
+if (typeof window !== 'undefined') {
+    window.SENTRY_CONFIG = SENTRY_CONFIG_OBJ;
+}
+if (typeof self !== 'undefined') {
+    self.SENTRY_CONFIG = SENTRY_CONFIG_OBJ;
+}
+if (typeof globalThis !== 'undefined') {
+    globalThis.SENTRY_CONFIG = SENTRY_CONFIG_OBJ;
 }
