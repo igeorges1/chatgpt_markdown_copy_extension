@@ -215,7 +215,10 @@ function htmlToMarkdown(element) {
                             result = '$' + mathContent + '$';
                         }
                     }
-                } else {
+                } else if (node.hasAttribute('data-state') && node.getAttribute('data-state') === 'closed') {
+                    result = ''; // Skip chatgpt reference spans
+                }
+                else {
                     result = Array.from(node.childNodes).map(child => processNode(child, indent)).join('');
                 }
                 break;
