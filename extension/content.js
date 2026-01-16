@@ -31,7 +31,7 @@ const DEFAULT_PLATFORM_CONFIG = {
     gemini: {
         messageSelector: 'message-content',
         buttonContainerSelector: 'copy-button',
-        copyButtonSelector: 'button[aria-label="Copy"]',
+        copyButtonSelector: 'button[data-test-id="copy-button"]',
         contentSelector: '.markdown',
         getButtonContainer: (copyButton) => copyButton.closest('copy-button')
     }
@@ -215,7 +215,7 @@ function htmlToMarkdown(element) {
                             result = '$' + mathContent + '$';
                         }
                     }
-                } else if (node.hasAttribute('data-state') && node.getAttribute('data-state') === 'closed') {
+                } else if ( (node.hasAttribute('data-state') && node.getAttribute('data-state') === 'closed') ||  node.firstElementChild?.firstElementChild?.tagName === 'BUTTON') {
                     result = ''; // Skip chatgpt reference spans
                 }
                 else {
@@ -250,25 +250,25 @@ function addMarkdownCopyButton(buttonContainer) {
 
     // Check if processing or already processed
     if (processingQueue.has(containerId)) {
-        logDebug('[addMarkdownCopyButton] Skipping - already in processing queue:', containerId);
+        logError('[addMarkdownCopyButton] Skipping - already in processing queue:', containerId);
         return;
     }
 
     // Check if button already added
     if (buttonContainer.querySelector('[data-markdown-copy="true"]')) {
-        logDebug('[addMarkdownCopyButton] Skipping - markdown button already exists');
+        logError('[addMarkdownCopyButton] Skipping - markdown button already exists');
         return;
     }
 
     // For Gemini, additionally check if next sibling is our button
     if (currentPlatform === 'gemini' && buttonContainer.nextElementSibling?.hasAttribute('data-markdown-copy')) {
-        logDebug('[addMarkdownCopyButton] Skipping - Gemini button already exists');
+        logError('[addMarkdownCopyButton] Skipping - Gemini button already exists');
         return;
     }
 
     const copyButton = buttonContainer.querySelector(config.copyButtonSelector);
     if (!copyButton) {
-        logDebug('[addMarkdownCopyButton] Copy button not found, selector:', config.copyButtonSelector);
+        logError('[addMarkdownCopyButton] Copy button not found, selector:', config.copyButtonSelector);
         return;
     }
 
@@ -438,22 +438,22 @@ function processExistingMessages() {
     }
 
     processTimeout = setTimeout(() => {
-        console.log('[processExistingMessages] Starting to process messages...');
+        logInfo('[processExistingMessages] Starting to process messages...');
 
         if (currentPlatform === 'chatgpt') {
             // Try multiple selector strategies for better coverage
             const containers = document.querySelectorAll(`${config.messageSelector} ${config.buttonContainerSelector}`);
-            console.log(`[processExistingMessages] Found ${containers.length} button containers using primary selector`);
+            logInfo(`[processExistingMessages] Found ${containers.length} button containers using primary selector`);
 
             // If no containers found, try finding copy buttons directly
             if (containers.length === 0) {
                 const copyButtons = document.querySelectorAll(config.copyButtonSelector);
-                console.log(`[processExistingMessages] Fallback: Found ${copyButtons.length} copy buttons`);
+                logInfo(`[processExistingMessages] Fallback: Found ${copyButtons.length} copy buttons`);
 
                 copyButtons.forEach(copyButton => {
                     const container = config.getButtonContainer(copyButton);
                     if (container && container.closest(config.messageSelector)) {
-                        console.log('[processExistingMessages] Adding button to container found via copy button');
+                        logInfo('[processExistingMessages] Adding button to container found via copy button');
                         addMarkdownCopyButton(container);
                     }
                 });
@@ -464,13 +464,13 @@ function processExistingMessages() {
             }
         } else if (currentPlatform === 'gemini') {
             const copyButtons = document.querySelectorAll(config.buttonContainerSelector);
-            console.log(`[processExistingMessages] Found ${copyButtons.length} Gemini copy buttons`);
+            logInfo(`[processExistingMessages] Found ${copyButtons.length} Gemini copy buttons`);
             copyButtons.forEach(button => {
                 addMarkdownCopyButton(button);
             });
         }
 
-        console.log('[processExistingMessages] Processing complete');
+        logInfo('[processExistingMessages] Processing complete');
         processTimeout = null;
     }, 300); // 300ms debounce delay
 }
@@ -510,15 +510,15 @@ function waitForMainContent() {
 // Modified init function observer configuration
 async function init() {
     try {
-        console.log('[Init] Initializing Markdown Copy extension...');
+        logInfo('[Init] Initializing Markdown Copy extension...');
 
         initUrlChangeListener();
         await waitForPageLoad();
-        console.log('[Init] Page load complete');
+        logDebug('[Init] Page load complete');
         await waitForMainContent();
-        console.log('[Init] Main content detected');
+        logDebug('[Init] Main content detected');
         await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log('[Init] Starting to process existing messages');
+        logDebug('[Init] Starting to process existing messages');
         processExistingMessages();
 
 
@@ -537,14 +537,14 @@ async function init() {
                                     // Check for message container
                                     if (node.matches?.(config.messageSelector) ||
                                         node.querySelector?.(config.messageSelector)) {
-                                        logDebug('[MutationObserver] Detected new message container');
+                                        logInfo('[MutationObserver] Detected new message container');
                                         hasNewButtons = true;
                                         break;
                                     }
                                     // Also check for copy button directly (handles incremental rendering)
                                     if (node.matches?.(config.copyButtonSelector) ||
                                         node.querySelector?.(config.copyButtonSelector)) {
-                                        logDebug('[MutationObserver] Detected new copy button');
+                                        logInfo('[MutationObserver] Detected new copy button');
                                         hasNewButtons = true;
                                         break;
                                     }
@@ -553,7 +553,7 @@ async function init() {
                                         node.querySelector?.(config.buttonContainerSelector)) {
                                         // Verify it's within a message container
                                         if (node.closest?.(config.messageSelector)) {
-                                            logDebug('[MutationObserver] Detected new button container in message');
+                                            logInfo('[MutationObserver] Detected new button container in message');
                                             hasNewButtons = true;
                                             break;
                                         }
@@ -563,7 +563,7 @@ async function init() {
                                 if (currentPlatform === 'gemini' &&
                                     (node.matches?.(config.buttonContainerSelector) ||
                                         node.querySelector?.(config.buttonContainerSelector))) {
-                                    logDebug('[MutationObserver] Detected new Gemini copy button');
+                                    logInfo('[MutationObserver] Detected new Gemini copy button');
                                     hasNewButtons = true;
                                     break;
                                 }
@@ -578,7 +578,7 @@ async function init() {
                                 // Check if the attribute change is on a message container
                                 if (target.matches?.(config.messageSelector) ||
                                     target.querySelector?.(config.messageSelector)) {
-                                    logDebug('[MutationObserver] Detected attribute change on message container');
+                                    logInfo('[MutationObserver] Detected attribute change on message container');
                                     hasNewButtons = true;
                                     break;
                                 }
