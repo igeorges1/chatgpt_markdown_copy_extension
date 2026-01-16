@@ -646,11 +646,13 @@ function initUrlChangeListener() {
     console.log('[Init] init url change listener');
     history.pushState = function (...args) {
         originalPushState.apply(this, args);
+        currentUrl = location.href;
         createUrlChangeEvent();
     };
     // hook replaceState
     history.replaceState = function (...args) {
         originalReplaceState.apply(this, args);
+        currentUrl = location.href;
         createUrlChangeEvent();
     };
     // monitor popstate（browser back/forward）
@@ -659,11 +661,13 @@ function initUrlChangeListener() {
     window.addEventListener('hashchange', createUrlChangeEvent);
     window.addEventListener('urlchange', () => {
         console.log('URL change :', location.href);
+        currentUrl = location.href;
         processExistingMessages();
     });
     // 使用 MutationObserver 作为备用方案
     const urlObserver = new MutationObserver(() => {
         if (location.href !== currentUrl) {
+            currentUrl = location.href;
             createUrlChangeEvent();
         }
     });
