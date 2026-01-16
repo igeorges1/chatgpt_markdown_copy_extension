@@ -11,7 +11,8 @@
   },
   "permissions": [
     "clipboardWrite",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "options_ui": {
     "page": "options.html",
@@ -43,7 +44,7 @@
         "https://gemini.google.com/*"
       ],
       "js": [ "sentry-config.js", "sentry-helper.js", "content.js"],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ],
   "browser_specific_settings": {
