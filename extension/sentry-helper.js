@@ -120,7 +120,12 @@ window.logError = function(error, ...args) {
             }
         });
     } else {
-        const message = typeof error === 'string' ? error : JSON.stringify(error);
+        let message;
+        try {
+            message = typeof error === 'string' ? error : JSON.stringify(error);
+        } catch {
+            message = String(error);
+        }
         window.captureSentryMessage(message, 'error', {
             extra: {
                 args
