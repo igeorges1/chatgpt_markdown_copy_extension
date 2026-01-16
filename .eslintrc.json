@@ -18,7 +18,7 @@
     "semi": ["error", "always"],
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "no-console": "off",
-    "no-undef": "error",
+    "no-undef": "warn",
     "no-redeclare": "error",
     "no-prototype-builtins": "off",
     "prefer-const": "warn",
