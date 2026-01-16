@@ -664,7 +664,7 @@ function initUrlChangeListener() {
         currentUrl = location.href;
         processExistingMessages();
     });
-    // 使用 MutationObserver 作为备用方案
+    // use MutationObserver as a fallback for other url changes
     const urlObserver = new MutationObserver(() => {
         if (location.href !== currentUrl) {
             currentUrl = location.href;
