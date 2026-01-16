@@ -12,7 +12,7 @@ export async function getInstallId() {
     await chrome.storage.local.set({ [key]: id });
     return id;
   }
-  
+  // eslint-disable-next-line
   export async function resetInstallId() {
     await chrome.storage.local.remove('install_id_v1');
   }

@@ -9,9 +9,9 @@ function normalizeUnknownError(err) {
     }
 
     // Some libraries throw strings/objects
-    if (typeof err === "string") {
+    if (typeof err === 'string') {
         return {
-            name: "Error",
+            name: 'Error',
             message: err,
             stack: undefined
         };
@@ -19,13 +19,13 @@ function normalizeUnknownError(err) {
 
     try {
         return {
-            name: (err && err.name) ? String(err.name) : "NonError",
+            name: (err && err.name) ? String(err.name) : 'NonError',
             message: (err && err.message) ? String(err.message) : JSON.stringify(err),
             stack: err && err.stack ? String(err.stack) : undefined,
         };
     } catch {
         return {
-            name: "NonError",
+            name: 'NonError',
             message: String(err),
             stack: undefined
         };
@@ -44,12 +44,12 @@ window.captureSentryException = function(err, opts = {}) {
     const n = normalizeUnknownError(err);
 
     const payload = {
-        type: "CONTENT_ERROR",
+        type: 'CONTENT_ERROR',
         name: n.name,
         message: n.message,
         stack: n.stack,
         url: location.href,
-        where: opts.where || "content-script",
+        where: opts.where || 'content-script',
         tags: opts.tags || {},
         extra: opts.extra || {},
         ts: Date.now(),
@@ -68,13 +68,13 @@ window.captureSentryException = function(err, opts = {}) {
 
 window.captureSentryMessage = function(message, level = 'info', opts = {}) {
     const payload = {
-        type: "CONTENT_MESSAGE",
+        type: 'CONTENT_MESSAGE',
         level: level,
         name: null,
         message: message,
         stack: null,
         url: location.href,
-        where: opts.where || "content-script",
+        where: opts.where || 'content-script',
         tags: opts.tags || {},
         extra: opts.extra || {},
         ts: Date.now(),
@@ -93,9 +93,9 @@ window.captureSentryMessage = function(message, level = 'info', opts = {}) {
 
 // Optional: Global fallback (doesn't guarantee catching everything, but forwards what it catches)
 window.installGlobalErrorForwarding = function() {
-    window.addEventListener("error", (ev) => {
+    window.addEventListener('error', (ev) => {
         window.captureSentryException(ev.error || ev.message, {
-            where: "window.onerror",
+            where: 'window.onerror',
             extra: {
                 filename: ev.filename,
                 lineno: ev.lineno,
@@ -104,9 +104,9 @@ window.installGlobalErrorForwarding = function() {
         });
     });
 
-    window.addEventListener("unhandledrejection", (ev) => {
+    window.addEventListener('unhandledrejection', (ev) => {
         window.captureSentryException(ev.reason, {
-            where: "unhandledrejection"
+            where: 'unhandledrejection'
         });
     });
 };
