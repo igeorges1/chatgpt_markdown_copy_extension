@@ -1,6 +1,5 @@
 // Content Script
-// Dependencies (SENTRY_CONFIG, sentry-helper functions) are loaded globally via manifest.json
-// content_scripts order: sentry.min.js -> sentry-config.js -> sentry-helper.js -> content.js
+// Content Script
 
 // Add global variables at the beginning of script
 let observer = null;
@@ -8,6 +7,21 @@ const processingQueue = new Set();
 let processTimeout = null;
 // Global config variable (will be loaded from storage)
 let config = null;
+
+// Logging helpers
+function logInfo(...args) {
+    console.log('[Markdown Copy]', ...args);
+}
+
+function logError(...args) {
+    console.error('[Markdown Copy]', ...args);
+}
+
+function logDebug(..._args) {
+    // Only log debug if needed or verbose
+    // console.debug('[Markdown Copy]', ...args);
+}
+
 // Detect current platform
 function detectPlatform() {
     const hostname = window.location.hostname;
@@ -39,9 +53,8 @@ const DEFAULT_PLATFORM_CONFIG = {
 // Load custom selectors from storage
 function loadCustomSelectors(callback) {
     if (typeof chrome !== 'undefined' && chrome.storage) {
-        chrome.storage.sync.get(['customSelectors', 'debugOptions'], (result) => {
+        chrome.storage.sync.get(['customSelectors'], (result) => {
             const customSelectors = result.customSelectors || {};
-            const debugOptions = result.debugOptions || {};
 
             // Merge custom selectors with defaults
             const platformSelectors = customSelectors[currentPlatform] || {};
@@ -55,15 +68,14 @@ function loadCustomSelectors(callback) {
                 getButtonContainer: defaultSelectors.getButtonContainer
             };
 
-            logInfo('[Markdown Copy] Loaded config:', config);
-            logInfo('[Markdown Copy] Debug options:', debugOptions);
+            logInfo('Loaded config:', config);
 
             if (callback) callback();
         });
     } else {
         // Fallback if chrome.storage is not available
         config = DEFAULT_PLATFORM_CONFIG[currentPlatform];
-        logInfo('[Markdown Copy] Using default config (storage not available)');
+        logInfo('Using default config (storage not available)');
         if (callback) callback();
     }
 }
@@ -606,16 +618,6 @@ async function init() {
         });
 
         logInfo(`Markdown Copy initialized for ${currentPlatform}`);
-
-        // Report successful initialization
-        if (typeof Sentry !== 'undefined' && Sentry.addBreadcrumb) {
-            Sentry.addBreadcrumb({
-                category: 'initialization',
-                message: 'Extension initialized successfully',
-                level: 'info',
-                data: { platform: currentPlatform }
-            });
-        }
     } catch (error) {
         logError('[Init] Failed to initialize extension:', error);
     }
@@ -679,23 +681,4 @@ function initUrlChangeListener() {
         subtree: true
     });
 }
-// Debug helper: allow triggering a Sentry test event from the extension (optional)
-if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-    try {
-        chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-            if (message && message.action === 'testSentry') {
-                try {
-                    throw new Error('[Markdown Copy] Sentry test exception from content script');
-                } catch (err) {
-                    console.warn('Triggering Sentry test exception');
-                    captureSentryException(err, {
-                        tags: { operation: 'test_exception' },
-                        extra: { platform: currentPlatform }
-                    });
-                }
-            }
-        });
-    } catch (e) {
-        console.warn('[Markdown Copy] Failed to attach testSentry listener', e);
-    }
-}
+// End of content script

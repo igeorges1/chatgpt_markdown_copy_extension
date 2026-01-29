@@ -48,7 +48,6 @@ const elements = {
     selectorStatus: document.getElementById('selector-status'),
 
     // Debug options
-    enableSentry: document.getElementById('enable-sentry'),
     enableDomSnapshot: document.getElementById('enable-dom-snapshot'),
     saveDebug: document.getElementById('save-debug'),
     debugStatus: document.getElementById('debug-status')
@@ -88,7 +87,6 @@ function loadSettings() {
         elements.geminiContent.value = gemini.contentSelector || '';
 
         // Load debug options
-        elements.enableSentry.checked = debugOptions.enableSentry !== false; // default true
         elements.enableDomSnapshot.checked = debugOptions.enableDomSnapshot || false;
 
         // Set placeholders as default values
@@ -257,7 +255,6 @@ function openGitHub() {
 // Save debug options
 function saveDebugOptions() {
     const debugOptions = {
-        enableSentry: elements.enableSentry.checked,
         enableDomSnapshot: elements.enableDomSnapshot.checked
     };
 
