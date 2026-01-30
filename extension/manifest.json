@@ -16,8 +16,7 @@
   },
   "host_permissions": [],
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "scripts": ["background.js"]
   },
   "web_accessible_resources": [
     {
