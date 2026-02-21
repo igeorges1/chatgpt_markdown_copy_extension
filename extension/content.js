@@ -577,7 +577,7 @@ function exportConversation() {
             }
 
             if (userContent) {
-                 markdown += `**User:**\n${userContent}\n\n`;
+                markdown += `**User:**\n${userContent}\n\n`;
             }
 
             const content = msg.querySelector('.markdown') || msg;
