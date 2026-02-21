@@ -13,7 +13,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     permissions:
       contents: write
 
@@ -31,8 +31,7 @@ jobs:
         run: |
           npm ci
           npm install -g web-ext
-          sudo apt-get update
-          sudo apt-get install -y jq
+          brew install jq
 
       - name: Build Extension
         run: npm run build
@@ -91,6 +90,91 @@ jobs:
 
           echo "Firefox extension built successfully"
 
+      - name: Build Safari extension
+        run: |
+          # Create a temporary directory for Safari build
+          mkdir -p build/safari-temp
+
+          # Copy extension files
+          cp -r extension/* build/safari-temp/
+
+          # Remove Firefox-specific settings from manifest.json
+          cd build/safari-temp
+          if command -v jq &> /dev/null; then
+            jq 'del(.browser_specific_settings)' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+          else
+            # Fallback: use Python to remove browser_specific_settings
+            python3 -c "import json; data=json.load(open('manifest.json')); data.pop('browser_specific_settings', None); json.dump(data, open('manifest.json', 'w'), indent=2)"
+          fi
+          cd ../..
+
+          echo "Extension files prepared in build/safari-temp"
+          echo "Contents:"
+          ls -la build/safari-temp/
+
+          echo "Manifest.json content:"
+          cat build/safari-temp/manifest.json
+
+          # Convert to Safari App Extension - capture full output
+          echo "Running safari-web-extension-converter..."
+          set -x  # Enable command tracing
+
+          xcrun safari-web-extension-converter build/safari-temp \
+            --project-location build/safari-project \
+            --app-name "ChatGPT Markdown Copy" \
+            --bundle-identifier "dev.bugparty.chatgpt-markdown-copy" \
+            --swift \
+            --no-open 2>&1 | tee converter-output.log
+
+          CONVERTER_EXIT_CODE=${PIPESTATUS[0]}
+          set +x  # Disable command tracing
+
+          echo "Converter exit code: $CONVERTER_EXIT_CODE"
+          echo "Full converter output:"
+          cat converter-output.log
+
+          if [ $CONVERTER_EXIT_CODE -ne 0 ]; then
+            echo "Error: safari-web-extension-converter failed with exit code $CONVERTER_EXIT_CODE"
+            exit 1
+          fi
+
+          echo "Checking if project was created..."
+          if [ -d "build/safari-project" ]; then
+            echo "Safari project directory created successfully"
+            ls -la build/safari-project/
+          else
+            echo "Error: Safari project directory not found"
+            echo "Current directory contents:"
+            ls -la build/
+            exit 1
+          fi
+
+          echo "Safari extension converted successfully"
+
+          # Verify the Xcode project was created
+          cd build/safari-project
+          # Find the .xcodeproj file
+          XCODE_PROJECT=$(find . -maxdepth 2 -name "*.xcodeproj" -type d | head -n 1)
+
+          if [ -z "$XCODE_PROJECT" ]; then
+            echo "Error: No Xcode project found"
+            exit 1
+          fi
+          echo "Found Xcode project: $XCODE_PROJECT"
+          cd ../..
+
+          # Create a zip of the web extension folder for manual conversion
+          cd build/safari-temp
+          zip -r ../chatgpt-markdown-copy-safari-webextension.zip .
+          cd ../..
+
+          # Also archive the Xcode project for users who want to sign and build
+          cd build
+          zip -r chatgpt-markdown-copy-safari-xcode-project.zip safari-project
+          cd ..
+
+          echo "Safari packages created successfully"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
@@ -99,6 +183,8 @@ jobs:
           files: |
             build/chatgpt-markdown-copy-chrome.zip
             build/chatgpt-markdown-copy-firefox.zip
+            build/chatgpt-markdown-copy-safari-webextension.zip
+            build/chatgpt-markdown-copy-safari-xcode-project.zip
           draft: false
           prerelease: false
         env:
