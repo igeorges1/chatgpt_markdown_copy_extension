@@ -179,7 +179,7 @@ jobs:
           cd build/safari-project
 
           # Find the .xcodeproj file
-          XCODE_PROJECT=$(find . -maxdepth 1 -name "*.xcodeproj" -type d | head -n 1)
+          XCODE_PROJECT=$(find . -maxdepth 2 -name "*.xcodeproj" -type d | head -n 1)
 
           if [ -z "$XCODE_PROJECT" ]; then
             echo "Error: No Xcode project found"
