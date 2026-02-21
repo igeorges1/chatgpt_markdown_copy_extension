@@ -34,6 +34,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
 
+      - name: Build Extension
+        run: npm run build
+
       - name: Create build directory
         run: mkdir -p build
 
@@ -42,8 +45,8 @@ jobs:
           # Create a temporary directory for Chrome build
           mkdir -p build/chrome-temp
 
-          # Copy extension files
-          cp -r extension/* build/chrome-temp/
+          # Copy built files
+          cp -r dist/* build/chrome-temp/
 
           # Remove Firefox-specific settings from manifest.json
           cd build/chrome-temp
@@ -66,8 +69,8 @@ jobs:
           mkdir -p build/firefox-temp
           mkdir -p build/firefox-artifacts
 
-          # Copy extension files
-          cp -r extension/* build/firefox-temp/
+          # Copy built files
+          cp -r dist/* build/firefox-temp/
 
           # Build using web-ext (this validates the extension too)
           cd build/firefox-temp
@@ -96,6 +99,51 @@ jobs:
           files: |
             build/chatgpt-markdown-copy-chrome.zip
             build/chatgpt-markdown-copy-firefox.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-safari:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Extension
+        run: npm run build
+
+      - name: Convert to Safari Extension
+        run: |
+          xcrun safari-web-extension-converter dist --project-location safari-build --no-open --app-name "ChatGPT Markdown Copy" --bundle-identifier "com.bugparty.chatgpt-markdown-copy"
+
+      - name: Build Safari App
+        run: |
+          xcodebuild -project "safari-build/ChatGPT Markdown Copy/ChatGPT Markdown Copy.xcodeproj" -scheme "ChatGPT Markdown Copy" -configuration Release build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+
+      - name: Zip Safari App
+        run: |
+          mkdir -p build
+          cd "safari-build/ChatGPT Markdown Copy/Build/Products/Release"
+          zip -r ../../../../../build/chatgpt-markdown-copy-safari.zip "ChatGPT Markdown Copy.app"
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          files: build/chatgpt-markdown-copy-safari.zip
           draft: false
           prerelease: false
         env:
