@@ -10,9 +10,14 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   build-chrome-firefox:
     runs-on: ubuntu-latest
+    needs: lint
 
     steps:
       - name: Checkout code

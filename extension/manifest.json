@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT & Gemini Markdown Copy",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "description": "Add Markdown copy button to ChatGPT and Gemini responses",
   "author": "bugparty",
   "icons": {
@@ -9,14 +9,23 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": [
-    "clipboardWrite"
-  ],
-  "host_permissions": [
-    "https://*.ingest.sentry.io/*"
+  "permissions": ["clipboardWrite", "storage"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "host_permissions": [],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["id.js"],
+      "matches": ["<all_urls>"]
+    }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.ingest.sentry.io"
+    "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "content_scripts": [
     {
@@ -25,14 +34,22 @@
         "https://chat.openai.com/*",
         "https://gemini.google.com/*"
       ],
-      "js": ["sentry.min.js", "sentry-config.js", "content.js"],
-      "run_at": "document_end"
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
   ],
   "browser_specific_settings": {
     "gecko": {
       "id": "markdown-copy@bugparty.dev",
-      "strict_min_version": "109.0"
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"],
+        "optional": [
+          "technicalAndInteraction",
+          "browsingActivity",
+          "websiteContent"
+        ]
+      }
     }
   }
 }
