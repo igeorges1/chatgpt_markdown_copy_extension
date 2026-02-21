@@ -519,6 +519,87 @@ function waitForMainContent() {
     });
 }
 
+function exportConversation() {
+    let markdown = '';
+
+    if (currentPlatform === 'chatgpt') {
+        const turns = document.querySelectorAll(config.messageSelector);
+        turns.forEach(turn => {
+            const userDiv = turn.querySelector('[data-message-author-role="user"]');
+            const aiDiv = turn.querySelector('[data-message-author-role="assistant"]');
+
+            if (userDiv) {
+                markdown += `**User:**\n${userDiv.innerText.trim()}\n\n`;
+            }
+
+            if (aiDiv) {
+                const content = aiDiv.querySelector('.markdown') || aiDiv;
+                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n`;
+            }
+
+            if (userDiv || aiDiv) {
+                markdown += '---\n\n';
+            }
+        });
+    } else if (currentPlatform === 'gemini') {
+        const aiMessages = document.querySelectorAll('message-content');
+        aiMessages.forEach(msg => {
+            // Attempt to find User message
+            let userContent = '';
+
+            // Traverse up to find a container that represents the row
+            let current = msg;
+            let iterations = 0;
+            // Limit traversal to avoid going too high up the DOM
+            while (current && iterations < 10) {
+                const parent = current.parentElement;
+                if (!parent || parent.tagName === 'MAIN' || parent === document.body) break;
+
+                const prev = current.previousElementSibling;
+                if (prev) {
+                    // Check if previous sibling is likely a user message
+                    // User messages usually don't contain message-content (which is AI)
+                    if (!prev.querySelector('message-content')) {
+                        // Try to find specific user query class if possible
+                        const query = prev.querySelector('.user-query') ||
+                                     prev.querySelector('[data-test-id="user-query"]') ||
+                                     prev;
+
+                        const text = query.innerText.trim();
+                        if (text.length > 0) {
+                            userContent = text;
+                            break;
+                        }
+                    }
+                }
+                current = parent;
+                iterations++;
+            }
+
+            if (userContent) {
+                 markdown += `**User:**\n${userContent}\n\n`;
+            }
+
+            const content = msg.querySelector('.markdown') || msg;
+            markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n---\n\n`;
+        });
+    }
+
+    return markdown || 'No conversation found.';
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'EXPORT_CONVERSATION') {
+        try {
+            const md = exportConversation();
+            sendResponse({ markdown: md });
+        } catch (e) {
+            console.error('Export error:', e);
+            sendResponse({ error: e.message });
+        }
+    }
+});
+
 // Modified init function observer configuration
 async function init() {
     try {
