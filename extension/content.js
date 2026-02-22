@@ -519,6 +519,84 @@ function waitForMainContent() {
     });
 }
 
+function exportConversation() {
+    let markdown = '';
+
+    if (currentPlatform === 'chatgpt') {
+        const turns = document.querySelectorAll(config.messageSelector);
+        turns.forEach(turn => {
+            const userDiv = turn.querySelector('[data-message-author-role="user"]');
+            const aiDiv = turn.querySelector('[data-message-author-role="assistant"]');
+
+            if (userDiv) {
+                markdown += `**User:**\n${userDiv.innerText.trim()}\n\n`;
+            }
+
+            if (aiDiv) {
+                const content = aiDiv.querySelector('.markdown') || aiDiv;
+                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n`;
+            }
+
+            if (userDiv || aiDiv) {
+                markdown += '---\n\n';
+            }
+        });
+    } else if (currentPlatform === 'gemini') {
+        // Find all conversation containers (each contains a user-query and model-response pair)
+        const conversationContainers = document.querySelectorAll('.conversation-container');
+        
+        conversationContainers.forEach(container => {
+            // Find user query within this container
+            const userQuery = container.querySelector('user-query');
+            if (userQuery) {
+                // Extract user text from query-text-line paragraphs
+                const queryTextLines = userQuery.querySelectorAll('.query-text-line');
+                if (queryTextLines.length > 0) {
+                    const userText = Array.from(queryTextLines)
+                        .map(p => p.textContent.trim())
+                        .filter(text => text.length > 0)
+                        .join('\n');
+                    if (userText) {
+                        markdown += `**User:**\n${userText}\n\n`;
+                    }
+                } else {
+                    // Fallback: try query-text div or user-query-bubble-with-background
+                    const queryText = userQuery.querySelector('.query-text') ||
+                                     userQuery.querySelector('.user-query-bubble-with-background');
+                    if (queryText) {
+                        const userText = queryText.textContent.trim();
+                        if (userText) {
+                            markdown += `**User:**\n${userText}\n\n`;
+                        }
+                    }
+                }
+            }
+
+            // Find AI response within this container
+            const messageContent = container.querySelector('message-content');
+            if (messageContent) {
+                const markdownEl = messageContent.querySelector('.markdown');
+                const content = markdownEl || messageContent;
+                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n---\n\n`;
+            }
+        });
+    }
+
+    return markdown || 'No conversation found.';
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'EXPORT_CONVERSATION') {
+        try {
+            const md = exportConversation();
+            sendResponse({ markdown: md });
+        } catch (e) {
+            console.error('Export error:', e);
+            sendResponse({ error: e.message });
+        }
+    }
+});
+
 // Modified init function observer configuration
 async function init() {
     try {
