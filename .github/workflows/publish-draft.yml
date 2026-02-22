@@ -50,7 +50,7 @@ jobs:
           echo "Chrome extension package created at build/chrome-extension.zip"
 
       - name: Upload to Chrome Web Store (Draft)
-        uses: wirekang/chrome-extension-upload-action@v1
+        uses: mnao305/chrome-extension-upload@v5.0.0
         with:
           file-path: build/chrome-extension.zip
           extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
