@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install -g web-ext
+          npm install -g web-ext chrome-webstore-upload-cli
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Build Extension
@@ -50,14 +50,22 @@ jobs:
           echo "Chrome extension package created at build/chrome-extension.zip"
 
       - name: Upload to Chrome Web Store
-        uses: wirekang/chrome-extension-upload-action@v1
-        with:
-          file-path: build/chrome-extension.zip
-          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
-          client-id: ${{ secrets.CHROME_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: true
+        run: |
+          chrome-webstore-upload upload \
+            --source build/chrome-extension.zip \
+            --extension-id ${{ secrets.CHROME_EXTENSION_ID }} \
+            --client-id ${{ secrets.CHROME_CLIENT_ID }} \
+            --client-secret ${{ secrets.CHROME_CLIENT_SECRET }} \
+            --refresh-token ${{ secrets.CHROME_REFRESH_TOKEN }}
+
+      - name: Publish to Chrome Web Store
+        run: |
+          chrome-webstore-upload publish \
+            --extension-id ${{ secrets.CHROME_EXTENSION_ID }} \
+            --client-id ${{ secrets.CHROME_CLIENT_ID }} \
+            --client-secret ${{ secrets.CHROME_CLIENT_SECRET }} \
+            --refresh-token ${{ secrets.CHROME_REFRESH_TOKEN }} \
+            --target default
 
       # Firefox Publishing
       - name: Publish to Firefox Add-ons (AMO)
