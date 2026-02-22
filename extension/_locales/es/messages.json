@@ -1,0 +1,202 @@
+{
+  "appName": {
+    "message": "ChatGPT & Gemini Markdown Copy"
+  },
+  "appDescription": {
+    "message": "Agrega un botón de copia Markdown a las respuestas de ChatGPT y Gemini"
+  },
+  "exportConversation": {
+    "message": "Exportar conversación"
+  },
+  "exportAsMarkdown": {
+    "message": "Exportar como Markdown"
+  },
+  "exporting": {
+    "message": "Exportando..."
+  },
+  "noActiveTab": {
+    "message": "No se encontró una pestaña activa"
+  },
+  "exportSuccess": {
+    "message": "¡Exportación exitosa!"
+  },
+  "noContentReceived": {
+    "message": "No se recibió contenido"
+  },
+  "exportFailed": {
+    "message": "Exportación fallida:"
+  },
+  "exportFailedRefresh": {
+    "message": "Exportación fallida. Actualice la página e intente de nuevo."
+  },
+  "settingsTitle": {
+    "message": "ChatGPT & Gemini Markdown Copy - Configuración"
+  },
+  "feedbackTitle": {
+    "message": "📝 Comentarios"
+  },
+  "feedbackDescription": {
+    "message": "¿Encontró un error o tiene una solicitud de función? ¡Háganos saber!"
+  },
+  "feedbackType": {
+    "message": "Tipo:"
+  },
+  "bugReport": {
+    "message": "Reporte de error"
+  },
+  "featureRequest": {
+    "message": "Solicitud de función"
+  },
+  "selectorNotWorking": {
+    "message": "El selector no funciona"
+  },
+  "other": {
+    "message": "Otro"
+  },
+  "messageLabel": {
+    "message": "Mensaje:"
+  },
+  "messagePlaceholder": {
+    "message": "Describa el problema o sugerencia..."
+  },
+  "contactEmailLabel": {
+    "message": "Correo electrónico de contacto (opcional):"
+  },
+  "contactEmailPlaceholder": {
+    "message": "su@correo.com (para que podamos hacer seguimiento)"
+  },
+  "emailHelpText": {
+    "message": "Proporcione su correo electrónico si desea una respuesta. No se almacena en ningún lugar."
+  },
+  "includeSystemInfo": {
+    "message": "Incluir información del sistema (versión de extensión, navegador, URL)"
+  },
+  "previewTitle": {
+    "message": "Vista previa de lo que se enviará:"
+  },
+  "submitFeedback": {
+    "message": "Enviar comentarios"
+  },
+  "openGithubIssues": {
+    "message": "Abrir problemas de GitHub"
+  },
+  "advancedSettings": {
+    "message": "⚙️ Configuración avanzada"
+  },
+  "advancedSettingsDesc": {
+    "message": "Personalice los selectores CSS si la extensión deja de funcionar después de una actualización del sitio web. Advertencia: ¡Modifique esto solo si sabe lo que está haciendo!"
+  },
+  "chatgptSelectors": {
+    "message": "Selectores de ChatGPT"
+  },
+  "geminiSelectors": {
+    "message": "Selectores de Gemini"
+  },
+  "messageContainer": {
+    "message": "Contenedor de mensajes:"
+  },
+  "buttonContainer": {
+    "message": "Contenedor de botones:"
+  },
+  "copyButton": {
+    "message": "Botón de copia:"
+  },
+  "contentSelector": {
+    "message": "Contenido:"
+  },
+  "messageSelectorHelp": {
+    "message": "Selector para cada turno de conversación"
+  },
+  "buttonContainerSelectorHelp": {
+    "message": "Contenedor donde vive el botón de copia"
+  },
+  "copyButtonSelectorHelp": {
+    "message": "Selector de botón de copia nativo"
+  },
+  "contentSelectorHelp": {
+    "message": "Contenedor de contenido Markdown"
+  },
+  "saveSettings": {
+    "message": "Guardar configuración"
+  },
+  "resetDefaults": {
+    "message": "Restablecer valores predeterminados"
+  },
+  "testSelectors": {
+    "message": "Probar selectores"
+  },
+  "debugOptions": {
+    "message": "🐛 Opciones de depuración"
+  },
+  "enableDomSnapshot": {
+    "message": "Habilitar instantáneas DOM en errores (para informes de errores)"
+  },
+  "domSnapshotHelp": {
+    "message": "Incluye estructura de página saneada al informar errores"
+  },
+  "saveDebugSettings": {
+    "message": "Guardar configuración de depuración"
+  },
+  "privacyPolicy": {
+    "message": "Política de privacidad"
+  },
+  "license": {
+    "message": "Licencia"
+  },
+  "errorSavingSettings": {
+    "message": "Error al guardar la configuración: "
+  },
+  "settingsSaved": {
+    "message": "¡Configuración guardada! Actualice las páginas de ChatGPT/Gemini."
+  },
+  "confirmReset": {
+    "message": "¿Restablecer todos los selectores a los valores predeterminados?"
+  },
+  "resetSuccess": {
+    "message": "Restablecido a los valores predeterminados. Actualice las páginas de ChatGPT/Gemini."
+  },
+  "promptPlatform": {
+    "message": "¿Qué plataforma probar? (chatgpt/gemini)"
+  },
+  "invalidPlatform": {
+    "message": "Plataforma inválida. Ingrese \"chatgpt\" o \"gemini\"."
+  },
+  "openingPlatform": {
+    "message": "Abriendo $1... Revise la consola para ver los resultados de la prueba del selector.",
+    "placeholders": {
+      "platform": {
+        "content": "$1"
+      }
+    }
+  },
+  "enterFeedback": {
+    "message": "Por favor ingrese su mensaje de comentarios."
+  },
+  "openingGithub": {
+    "message": "Abriendo GitHub para enviar sus comentarios..."
+  },
+  "errorSavingDebug": {
+    "message": "Error al guardar opciones de depuración: "
+  },
+  "debugSaved": {
+    "message": "¡Opciones de depuración guardadas! Actualice las páginas de ChatGPT/Gemini."
+  },
+  "copyAsMarkdown": {
+    "message": "Copiar como Markdown"
+  },
+  "cantFindMessageBody": {
+    "message": "No se puede encontrar el cuerpo del mensaje"
+  },
+  "userRole": {
+    "message": "**Usuario:**"
+  },
+  "aiRole": {
+    "message": "**IA:**"
+  },
+  "noConversationFound": {
+    "message": "No se encontró conversación."
+  },
+  "version": {
+      "message": "Versión"
+  }
+}

@@ -126,30 +126,30 @@ function saveSelectors() {
 
     chrome.storage.sync.set({ customSelectors }, () => {
         if (chrome.runtime.lastError) {
-            showStatus(elements.selectorStatus, 'Error saving settings: ' + chrome.runtime.lastError.message, 'error');
+            showStatus(elements.selectorStatus, chrome.i18n.getMessage('errorSavingSettings') + chrome.runtime.lastError.message, 'error');
         } else {
-            showStatus(elements.selectorStatus, 'Settings saved! Please refresh ChatGPT/Gemini pages.', 'success');
+            showStatus(elements.selectorStatus, chrome.i18n.getMessage('settingsSaved'), 'success');
         }
     });
 }
 
 // Reset to default selectors
 function resetSelectors() {
-    if (!confirm('Reset all selectors to default values?')) {
+    if (!confirm(chrome.i18n.getMessage('confirmReset'))) {
         return;
     }
 
     chrome.storage.sync.remove('customSelectors', () => {
         loadSettings();
-        showStatus(elements.selectorStatus, 'Reset to default values. Please refresh ChatGPT/Gemini pages.', 'success');
+        showStatus(elements.selectorStatus, chrome.i18n.getMessage('resetSuccess'), 'success');
     });
 }
 
 // Test selectors
 function testSelectors() {
-    const platform = prompt('Which platform to test? (chatgpt/gemini)');
+    const platform = prompt(chrome.i18n.getMessage('promptPlatform'));
     if (!platform || !['chatgpt', 'gemini'].includes(platform.toLowerCase())) {
-        showStatus(elements.selectorStatus, 'Invalid platform. Enter "chatgpt" or "gemini".', 'error');
+        showStatus(elements.selectorStatus, chrome.i18n.getMessage('invalidPlatform'), 'error');
         return;
     }
 
@@ -157,7 +157,7 @@ function testSelectors() {
         ? 'https://chatgpt.com'
         : 'https://gemini.google.com';
 
-    showStatus(elements.selectorStatus, `Opening ${platform}... Check the console for selector test results.`, 'info', 5000);
+    showStatus(elements.selectorStatus, chrome.i18n.getMessage('openingPlatform', [platform]), 'info', 5000);
 
     // Open platform in new tab and send test message
     chrome.tabs.create({ url }, (tab) => {
@@ -225,7 +225,7 @@ function submitFeedback() {
     const text = elements.feedbackText.value.trim();
 
     if (!text) {
-        showStatus(elements.feedbackStatus, 'Please enter your feedback message.', 'error');
+        showStatus(elements.feedbackStatus, chrome.i18n.getMessage('enterFeedback'), 'error');
         return;
     }
 
@@ -244,7 +244,7 @@ function submitFeedback() {
     elements.feedbackText.value = '';
     elements.contactEmail.value = '';
     updatePreview();
-    showStatus(elements.feedbackStatus, 'Opening GitHub to submit your feedback...', 'success');
+    showStatus(elements.feedbackStatus, chrome.i18n.getMessage('openingGithub'), 'success');
 }
 
 // Open GitHub issues page
@@ -260,9 +260,9 @@ function saveDebugOptions() {
 
     chrome.storage.sync.set({ debugOptions }, () => {
         if (chrome.runtime.lastError) {
-            showStatus(elements.debugStatus, 'Error saving debug options: ' + chrome.runtime.lastError.message, 'error');
+            showStatus(elements.debugStatus, chrome.i18n.getMessage('errorSavingDebug') + chrome.runtime.lastError.message, 'error');
         } else {
-            showStatus(elements.debugStatus, 'Debug options saved! Please refresh ChatGPT/Gemini pages.', 'success');
+            showStatus(elements.debugStatus, chrome.i18n.getMessage('debugSaved'), 'success');
         }
     });
 }
