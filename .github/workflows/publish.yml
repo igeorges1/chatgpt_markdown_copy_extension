@@ -7,7 +7,7 @@ jobs:
   publish:
     name: Publish to Stores
     runs-on: ubuntu-latest
-
+    environment: publish
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
