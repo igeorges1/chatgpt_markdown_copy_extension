@@ -4,10 +4,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
-    name: Publish to Stores
+  build:
+    name: Build Extension
     runs-on: ubuntu-latest
-    environment: publish
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,7 +29,6 @@ jobs:
       - name: Create build directory
         run: mkdir -p build
 
-      # Chrome Publishing
       - name: Prepare Chrome Package
         run: |
           # Create a temporary directory for Chrome build
@@ -49,6 +47,30 @@ jobs:
 
           echo "Chrome extension package created at build/chrome-extension.zip"
 
+      - name: Upload Chrome build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension
+          path: build/chrome-extension.zip
+
+      - name: Upload Firefox build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox-extension
+          path: dist
+
+  publish-chrome:
+    name: Publish to Chrome Web Store
+    runs-on: ubuntu-latest
+    needs: build
+    environment: publish
+    steps:
+      - name: Download Chrome build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chrome-extension
+          path: build
+
       - name: Upload to Chrome Web Store
         uses: mnao305/chrome-extension-upload@v5.0.0
         with:
@@ -59,13 +81,28 @@ jobs:
           refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
           publish: true
 
-      # Firefox Publishing
+  publish-firefox:
+    name: Publish to Firefox Add-ons
+    runs-on: ubuntu-latest
+    needs: build
+    environment: publish
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install web-ext
+        run: npm install -g web-ext
+
+      - name: Download Firefox build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: firefox-extension
+          path: dist
+
       - name: Publish to Firefox Add-ons (AMO)
         run: |
-          # The dist/ directory already contains the correct manifest for Firefox (with browser_specific_settings)
-          # We use web-ext sign to package, sign and submit the extension.
-          # The 'listed' channel means it is submitted for review on AMO.
-
           web-ext sign \
             --source-dir dist \
             --channel listed \
