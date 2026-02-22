@@ -1,0 +1,74 @@
+name: Publish Extension
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish to Stores
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g web-ext
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Build Extension
+        run: npm run build
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      # Chrome Publishing
+      - name: Prepare Chrome Package
+        run: |
+          # Create a temporary directory for Chrome build
+          mkdir -p build/chrome-temp
+
+          # Copy built files (dist/ contains the output of npm run build)
+          cp -r dist/* build/chrome-temp/
+
+          # Remove Firefox-specific settings from manifest.json
+          cd build/chrome-temp
+          jq 'del(.browser_specific_settings)' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+
+          # Create zip file
+          zip -r ../chrome-extension.zip .
+          cd ../..
+
+          echo "Chrome extension package created at build/chrome-extension.zip"
+
+      - name: Upload to Chrome Web Store
+        uses: wirekang/chrome-extension-upload-action@v1
+        with:
+          file-path: build/chrome-extension.zip
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: true
+
+      # Firefox Publishing
+      - name: Publish to Firefox Add-ons (AMO)
+        if: ${{ secrets.AMO_JWT_ISSUER != '' && secrets.AMO_JWT_SECRET != '' }}
+        run: |
+          # The dist/ directory already contains the correct manifest for Firefox (with browser_specific_settings)
+          # We use web-ext sign to package, sign and submit the extension.
+          # The 'listed' channel means it is submitted for review on AMO.
+
+          web-ext sign \
+            --source-dir dist \
+            --channel listed \
+            --api-key "${{ secrets.AMO_JWT_ISSUER }}" \
+            --api-secret "${{ secrets.AMO_JWT_SECRET }}"
