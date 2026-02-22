@@ -542,46 +542,43 @@ function exportConversation() {
             }
         });
     } else if (currentPlatform === 'gemini') {
-        const aiMessages = document.querySelectorAll('message-content');
-        aiMessages.forEach(msg => {
-            // Attempt to find User message
-            let userContent = '';
-
-            // Traverse up to find a container that represents the row
-            let current = msg;
-            let iterations = 0;
-            // Limit traversal to avoid going too high up the DOM
-            while (current && iterations < 10) {
-                const parent = current.parentElement;
-                if (!parent || parent.tagName === 'MAIN' || parent === document.body) break;
-
-                const prev = current.previousElementSibling;
-                if (prev) {
-                    // Check if previous sibling is likely a user message
-                    // User messages usually don't contain message-content (which is AI)
-                    if (!prev.querySelector('message-content')) {
-                        // Try to find specific user query class if possible
-                        const query = prev.querySelector('.user-query') ||
-                                     prev.querySelector('[data-test-id="user-query"]') ||
-                                     prev;
-
-                        const text = query.innerText.trim();
-                        if (text.length > 0) {
-                            userContent = text;
-                            break;
+        // Find all conversation containers (each contains a user-query and model-response pair)
+        const conversationContainers = document.querySelectorAll('.conversation-container');
+        
+        conversationContainers.forEach(container => {
+            // Find user query within this container
+            const userQuery = container.querySelector('user-query');
+            if (userQuery) {
+                // Extract user text from query-text-line paragraphs
+                const queryTextLines = userQuery.querySelectorAll('.query-text-line');
+                if (queryTextLines.length > 0) {
+                    const userText = Array.from(queryTextLines)
+                        .map(p => p.textContent.trim())
+                        .filter(text => text.length > 0)
+                        .join('\n');
+                    if (userText) {
+                        markdown += `**User:**\n${userText}\n\n`;
+                    }
+                } else {
+                    // Fallback: try query-text div or user-query-bubble-with-background
+                    const queryText = userQuery.querySelector('.query-text') ||
+                                     userQuery.querySelector('.user-query-bubble-with-background');
+                    if (queryText) {
+                        const userText = queryText.textContent.trim();
+                        if (userText) {
+                            markdown += `**User:**\n${userText}\n\n`;
                         }
                     }
                 }
-                current = parent;
-                iterations++;
             }
 
-            if (userContent) {
-                markdown += `**User:**\n${userContent}\n\n`;
+            // Find AI response within this container
+            const messageContent = container.querySelector('message-content');
+            if (messageContent) {
+                const markdownEl = messageContent.querySelector('.markdown');
+                const content = markdownEl || messageContent;
+                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n---\n\n`;
             }
-
-            const content = msg.querySelector('.markdown') || msg;
-            markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n---\n\n`;
         });
     }
 
