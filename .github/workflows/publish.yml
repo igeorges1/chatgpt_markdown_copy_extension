@@ -61,7 +61,6 @@ jobs:
 
       # Firefox Publishing
       - name: Publish to Firefox Add-ons (AMO)
-        if: ${{ secrets.AMO_JWT_ISSUER != '' && secrets.AMO_JWT_SECRET != '' }}
         run: |
           # The dist/ directory already contains the correct manifest for Firefox (with browser_specific_settings)
           # We use web-ext sign to package, sign and submit the extension.
