@@ -8,9 +8,6 @@ jobs:
     name: Publish Draft to Stores
     runs-on: ubuntu-latest
     environment: publish
-    env:
-      AMO_SECRETS_AVAILABLE: ${{ secrets.AMO_JWT_ISSUER != '' && secrets.AMO_JWT_SECRET != '' }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,7 +61,6 @@ jobs:
 
       # Firefox Publishing (Unlisted / Signed for Self-Distribution)
       - name: Sign Firefox Extension (Unlisted)
-        if: ${{ env.AMO_SECRETS_AVAILABLE == 'true' }}
         run: |
           # 'unlisted' channel means it will be signed for self-distribution but not listed on AMO store.
           # This is good for testing the signed XPI.
@@ -77,7 +73,6 @@ jobs:
             --artifacts-dir build/firefox-artifacts
 
       - name: Upload Firefox Artifact
-        if: ${{ env.AMO_SECRETS_AVAILABLE == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: firefox-signed-extension
