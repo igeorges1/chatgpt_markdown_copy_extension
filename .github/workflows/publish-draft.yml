@@ -1,0 +1,82 @@
+name: Publish Draft / Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-draft:
+    name: Publish Draft to Stores
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g web-ext
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Build Extension
+        run: npm run build
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      # Chrome Publishing (Draft)
+      - name: Prepare Chrome Package
+        run: |
+          # Create a temporary directory for Chrome build
+          mkdir -p build/chrome-temp
+
+          # Copy built files
+          cp -r dist/* build/chrome-temp/
+
+          # Remove Firefox-specific settings from manifest.json
+          cd build/chrome-temp
+          jq 'del(.browser_specific_settings)' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+
+          # Create zip file
+          zip -r ../chrome-extension.zip .
+          cd ../..
+
+          echo "Chrome extension package created at build/chrome-extension.zip"
+
+      - name: Upload to Chrome Web Store (Draft)
+        uses: wirekang/chrome-extension-upload-action@v1
+        with:
+          file-path: build/chrome-extension.zip
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: false # Upload only, do not publish to public
+
+      # Firefox Publishing (Unlisted / Signed for Self-Distribution)
+      - name: Sign Firefox Extension (Unlisted)
+        if: ${{ secrets.AMO_JWT_ISSUER != '' && secrets.AMO_JWT_SECRET != '' }}
+        run: |
+          # The dist/ directory already contains the correct manifest for Firefox
+          # 'unlisted' channel means it will be signed for self-distribution but not listed on AMO store.
+          # This is good for testing the signed XPI.
+
+          web-ext sign \
+            --source-dir dist \
+            --channel unlisted \
+            --api-key "${{ secrets.AMO_JWT_ISSUER }}" \
+            --api-secret "${{ secrets.AMO_JWT_SECRET }}" \
+            --artifacts-dir build/firefox-artifacts
+
+      - name: Upload Firefox Artifact
+        if: ${{ secrets.AMO_JWT_ISSUER != '' && secrets.AMO_JWT_SECRET != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox-signed-extension
+          path: build/firefox-artifacts/*.xpi
