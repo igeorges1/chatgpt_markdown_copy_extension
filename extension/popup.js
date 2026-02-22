@@ -4,14 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     exportBtn.addEventListener('click', async () => {
         exportBtn.disabled = true;
-        statusDiv.textContent = 'Exporting...';
+        statusDiv.textContent = chrome.i18n.getMessage('exporting');
         statusDiv.classList.remove('error');
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
             if (!tab) {
-                throw new Error('No active tab found');
+                throw new Error(chrome.i18n.getMessage('noActiveTab'));
             }
 
             // Send message to content script
@@ -19,13 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response && response.markdown) {
                 downloadFile(response.markdown, 'conversation.md');
-                statusDiv.textContent = 'Export successful!';
+                statusDiv.textContent = chrome.i18n.getMessage('exportSuccess');
             } else {
-                throw new Error(response?.error || 'No content received');
+                throw new Error(response?.error || chrome.i18n.getMessage('noContentReceived'));
             }
         } catch (error) {
-            console.error('Export failed:', error);
-            statusDiv.textContent = 'Export failed. Refresh page & try again.';
+            console.error(chrome.i18n.getMessage('exportFailed'), error);
+            statusDiv.textContent = chrome.i18n.getMessage('exportFailedRefresh');
             statusDiv.classList.add('error');
         } finally {
             setTimeout(() => {

@@ -1,0 +1,202 @@
+{
+  "appName": {
+    "message": "ChatGPT & Gemini Markdown Copy"
+  },
+  "appDescription": {
+    "message": "ChatGPT と Gemini の応答に Markdown コピーボタンを追加します"
+  },
+  "exportConversation": {
+    "message": "会話をエクスポート"
+  },
+  "exportAsMarkdown": {
+    "message": "Markdown としてエクスポート"
+  },
+  "exporting": {
+    "message": "エクスポート中..."
+  },
+  "noActiveTab": {
+    "message": "アクティブなタブが見つかりません"
+  },
+  "exportSuccess": {
+    "message": "エクスポート成功！"
+  },
+  "noContentReceived": {
+    "message": "コンテンツを受信できませんでした"
+  },
+  "exportFailed": {
+    "message": "エクスポート失敗："
+  },
+  "exportFailedRefresh": {
+    "message": "エクスポートに失敗しました。ページを更新して再試行してください。"
+  },
+  "settingsTitle": {
+    "message": "ChatGPT & Gemini Markdown Copy - 設定"
+  },
+  "feedbackTitle": {
+    "message": "📝 フィードバック"
+  },
+  "feedbackDescription": {
+    "message": "バグや機能のリクエストがありますか？お知らせください！"
+  },
+  "feedbackType": {
+    "message": "タイプ："
+  },
+  "bugReport": {
+    "message": "バグ報告"
+  },
+  "featureRequest": {
+    "message": "機能リクエスト"
+  },
+  "selectorNotWorking": {
+    "message": "セレクタが機能しない"
+  },
+  "other": {
+    "message": "その他"
+  },
+  "messageLabel": {
+    "message": "メッセージ："
+  },
+  "messagePlaceholder": {
+    "message": "問題や提案を記述してください..."
+  },
+  "contactEmailLabel": {
+    "message": "連絡先メールアドレス（任意）："
+  },
+  "contactEmailPlaceholder": {
+    "message": "your@email.com（返信が必要な場合）"
+  },
+  "emailHelpText": {
+    "message": "返信が必要な場合はメールアドレスを入力してください。保存はされません。"
+  },
+  "includeSystemInfo": {
+    "message": "システム情報を含める（拡張機能のバージョン、ブラウザ、URL）"
+  },
+  "previewTitle": {
+    "message": "送信内容のプレビュー："
+  },
+  "submitFeedback": {
+    "message": "フィードバックを送信"
+  },
+  "openGithubIssues": {
+    "message": "GitHub Issues を開く"
+  },
+  "advancedSettings": {
+    "message": "⚙️ 詳細設定"
+  },
+  "advancedSettingsDesc": {
+    "message": "ウェブサイトの更新後に拡張機能が動作しなくなった場合、CSS セレクタをカスタマイズしてください。警告：何をしているか理解している場合のみ変更してください！"
+  },
+  "chatgptSelectors": {
+    "message": "ChatGPT セレクタ"
+  },
+  "geminiSelectors": {
+    "message": "Gemini セレクタ"
+  },
+  "messageContainer": {
+    "message": "メッセージコンテナ："
+  },
+  "buttonContainer": {
+    "message": "ボタンコンテナ："
+  },
+  "copyButton": {
+    "message": "コピーボタン："
+  },
+  "contentSelector": {
+    "message": "コンテンツ："
+  },
+  "messageSelectorHelp": {
+    "message": "各会話ターンのセレクタ"
+  },
+  "buttonContainerSelectorHelp": {
+    "message": "コピーボタンが存在するコンテナ"
+  },
+  "copyButtonSelectorHelp": {
+    "message": "ネイティブコピーボタンのセレクタ"
+  },
+  "contentSelectorHelp": {
+    "message": "Markdown コンテンツコンテナ"
+  },
+  "saveSettings": {
+    "message": "設定を保存"
+  },
+  "resetDefaults": {
+    "message": "デフォルトに戻す"
+  },
+  "testSelectors": {
+    "message": "セレクタをテスト"
+  },
+  "debugOptions": {
+    "message": "🐛 デバッグオプション"
+  },
+  "enableDomSnapshot": {
+    "message": "エラー時の DOM スナップショットを有効にする（バグ報告用）"
+  },
+  "domSnapshotHelp": {
+    "message": "エラー報告時にサニタイズされたページ構造を含めます"
+  },
+  "saveDebugSettings": {
+    "message": "デバッグ設定を保存"
+  },
+  "privacyPolicy": {
+    "message": "プライバシーポリシー"
+  },
+  "license": {
+    "message": "ライセンス"
+  },
+  "errorSavingSettings": {
+    "message": "設定の保存エラー："
+  },
+  "settingsSaved": {
+    "message": "設定を保存しました！ChatGPT/Gemini ページを更新してください。"
+  },
+  "confirmReset": {
+    "message": "すべてのセレクタをデフォルト値にリセットしますか？"
+  },
+  "resetSuccess": {
+    "message": "デフォルト値にリセットしました。ChatGPT/Gemini ページを更新してください。"
+  },
+  "promptPlatform": {
+    "message": "どのプラットフォームをテストしますか？(chatgpt/gemini)"
+  },
+  "invalidPlatform": {
+    "message": "無効なプラットフォームです。\"chatgpt\" または \"gemini\" を入力してください。"
+  },
+  "openingPlatform": {
+    "message": "$1 を開いています... コンソールでセレクタテスト結果を確認してください。",
+    "placeholders": {
+      "platform": {
+        "content": "$1"
+      }
+    }
+  },
+  "enterFeedback": {
+    "message": "フィードバックメッセージを入力してください。"
+  },
+  "openingGithub": {
+    "message": "フィードバックを送信するために GitHub を開いています..."
+  },
+  "errorSavingDebug": {
+    "message": "デバッグオプションの保存エラー："
+  },
+  "debugSaved": {
+    "message": "デバッグオプションを保存しました！ChatGPT/Gemini ページを更新してください。"
+  },
+  "copyAsMarkdown": {
+    "message": "Markdown としてコピー"
+  },
+  "cantFindMessageBody": {
+    "message": "メッセージ本文が見つかりません"
+  },
+  "userRole": {
+    "message": "**ユーザー：**"
+  },
+  "aiRole": {
+    "message": "**AI：**"
+  },
+  "noConversationFound": {
+    "message": "会話が見つかりません。"
+  },
+  "version": {
+      "message": "バージョン"
+  }
+}

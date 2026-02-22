@@ -1,0 +1,202 @@
+{
+  "appName": {
+    "message": "ChatGPT & Gemini Markdown Copy"
+  },
+  "appDescription": {
+    "message": "Add Markdown copy button to ChatGPT and Gemini responses"
+  },
+  "exportConversation": {
+    "message": "Export Conversation"
+  },
+  "exportAsMarkdown": {
+    "message": "Export as Markdown"
+  },
+  "exporting": {
+    "message": "Exporting..."
+  },
+  "noActiveTab": {
+    "message": "No active tab found"
+  },
+  "exportSuccess": {
+    "message": "Export successful!"
+  },
+  "noContentReceived": {
+    "message": "No content received"
+  },
+  "exportFailed": {
+    "message": "Export failed:"
+  },
+  "exportFailedRefresh": {
+    "message": "Export failed. Refresh page & try again."
+  },
+  "settingsTitle": {
+    "message": "ChatGPT & Gemini Markdown Copy - Settings"
+  },
+  "feedbackTitle": {
+    "message": "📝 Feedback"
+  },
+  "feedbackDescription": {
+    "message": "Found a bug or have a feature request? Let us know!"
+  },
+  "feedbackType": {
+    "message": "Type:"
+  },
+  "bugReport": {
+    "message": "Bug Report"
+  },
+  "featureRequest": {
+    "message": "Feature Request"
+  },
+  "selectorNotWorking": {
+    "message": "Selector Not Working"
+  },
+  "other": {
+    "message": "Other"
+  },
+  "messageLabel": {
+    "message": "Message:"
+  },
+  "messagePlaceholder": {
+    "message": "Describe the issue or suggestion..."
+  },
+  "contactEmailLabel": {
+    "message": "Contact Email (Optional):"
+  },
+  "contactEmailPlaceholder": {
+    "message": "your@email.com (so I can follow up with you)"
+  },
+  "emailHelpText": {
+    "message": "Provide your email if you want a response. Not stored anywhere."
+  },
+  "includeSystemInfo": {
+    "message": "Include system info (extension version, browser, URL)"
+  },
+  "previewTitle": {
+    "message": "Preview of what will be submitted:"
+  },
+  "submitFeedback": {
+    "message": "Submit Feedback"
+  },
+  "openGithubIssues": {
+    "message": "Open GitHub Issues"
+  },
+  "advancedSettings": {
+    "message": "⚙️ Advanced Settings"
+  },
+  "advancedSettingsDesc": {
+    "message": "Customize CSS selectors if the extension stops working after a website update. Warning: Only modify these if you know what you're doing!"
+  },
+  "chatgptSelectors": {
+    "message": "ChatGPT Selectors"
+  },
+  "geminiSelectors": {
+    "message": "Gemini Selectors"
+  },
+  "messageContainer": {
+    "message": "Message Container:"
+  },
+  "buttonContainer": {
+    "message": "Button Container:"
+  },
+  "copyButton": {
+    "message": "Copy Button:"
+  },
+  "contentSelector": {
+    "message": "Content:"
+  },
+  "messageSelectorHelp": {
+    "message": "Selector for each message turn"
+  },
+  "buttonContainerSelectorHelp": {
+    "message": "Container where copy button lives"
+  },
+  "copyButtonSelectorHelp": {
+    "message": "Native copy button selector"
+  },
+  "contentSelectorHelp": {
+    "message": "Markdown content container"
+  },
+  "saveSettings": {
+    "message": "Save Settings"
+  },
+  "resetDefaults": {
+    "message": "Reset to Default"
+  },
+  "testSelectors": {
+    "message": "Test Selectors"
+  },
+  "debugOptions": {
+    "message": "🐛 Debug Options"
+  },
+  "enableDomSnapshot": {
+    "message": "Enable DOM snapshots on errors (for bug reports)"
+  },
+  "domSnapshotHelp": {
+    "message": "Includes sanitized page structure when reporting errors"
+  },
+  "saveDebugSettings": {
+    "message": "Save Debug Settings"
+  },
+  "privacyPolicy": {
+    "message": "Privacy Policy"
+  },
+  "license": {
+    "message": "License"
+  },
+  "errorSavingSettings": {
+    "message": "Error saving settings: "
+  },
+  "settingsSaved": {
+    "message": "Settings saved! Please refresh ChatGPT/Gemini pages."
+  },
+  "confirmReset": {
+    "message": "Reset all selectors to default values?"
+  },
+  "resetSuccess": {
+    "message": "Reset to default values. Please refresh ChatGPT/Gemini pages."
+  },
+  "promptPlatform": {
+    "message": "Which platform to test? (chatgpt/gemini)"
+  },
+  "invalidPlatform": {
+    "message": "Invalid platform. Enter \"chatgpt\" or \"gemini\"."
+  },
+  "openingPlatform": {
+    "message": "Opening $PLATFORM$... Check the console for selector test results.",
+    "placeholders": {
+      "platform": {
+        "content": "$1"
+      }
+    }
+  },
+  "enterFeedback": {
+    "message": "Please enter your feedback message."
+  },
+  "openingGithub": {
+    "message": "Opening GitHub to submit your feedback..."
+  },
+  "errorSavingDebug": {
+    "message": "Error saving debug options: "
+  },
+  "debugSaved": {
+    "message": "Debug options saved! Please refresh ChatGPT/Gemini pages."
+  },
+  "copyAsMarkdown": {
+    "message": "Copy as Markdown"
+  },
+  "cantFindMessageBody": {
+    "message": "Can't find message body"
+  },
+  "userRole": {
+    "message": "**User:**"
+  },
+  "aiRole": {
+    "message": "**AI:**"
+  },
+  "noConversationFound": {
+    "message": "No conversation found."
+  },
+  "version": {
+      "message": "Version"
+  }
+}

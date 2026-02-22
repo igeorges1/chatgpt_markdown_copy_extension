@@ -364,9 +364,9 @@ function addMarkdownCopyButton(buttonContainer) {
         mdButton.appendChild(ripple2);
     }
 
-    mdButton.setAttribute('aria-label', 'Copy as Markdown');
+    mdButton.setAttribute('aria-label', chrome.i18n.getMessage('copyAsMarkdown'));
     mdButton.setAttribute('data-markdown-copy', 'true');
-    mdButton.setAttribute('title', 'Copy as Markdown');
+    mdButton.setAttribute('title', chrome.i18n.getMessage('copyAsMarkdown'));
 
     // Add click event
     mdButton.addEventListener('click', async () => {
@@ -424,7 +424,7 @@ function addMarkdownCopyButton(buttonContainer) {
                 logError('Failed to convert to markdown:', err);
             }
         } else {
-            const errorMsg = "Can't find message body";
+            const errorMsg = chrome.i18n.getMessage('cantFindMessageBody');
             logError(errorMsg);
         }
     });
@@ -529,12 +529,12 @@ function exportConversation() {
             const aiDiv = turn.querySelector('[data-message-author-role="assistant"]');
 
             if (userDiv) {
-                markdown += `**User:**\n${userDiv.innerText.trim()}\n\n`;
+                markdown += `${chrome.i18n.getMessage('userRole')}\n${userDiv.innerText.trim()}\n\n`;
             }
 
             if (aiDiv) {
                 const content = aiDiv.querySelector('.markdown') || aiDiv;
-                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n`;
+                markdown += `${chrome.i18n.getMessage('aiRole')}\n${htmlToMarkdown(content)}\n\n`;
             }
 
             if (userDiv || aiDiv) {
@@ -557,7 +557,7 @@ function exportConversation() {
                         .filter(text => text.length > 0)
                         .join('\n');
                     if (userText) {
-                        markdown += `**User:**\n${userText}\n\n`;
+                        markdown += `${chrome.i18n.getMessage('userRole')}\n${userText}\n\n`;
                     }
                 } else {
                     // Fallback: try query-text div or user-query-bubble-with-background
@@ -566,7 +566,7 @@ function exportConversation() {
                     if (queryText) {
                         const userText = queryText.textContent.trim();
                         if (userText) {
-                            markdown += `**User:**\n${userText}\n\n`;
+                            markdown += `${chrome.i18n.getMessage('userRole')}\n${userText}\n\n`;
                         }
                     }
                 }
@@ -577,12 +577,12 @@ function exportConversation() {
             if (messageContent) {
                 const markdownEl = messageContent.querySelector('.markdown');
                 const content = markdownEl || messageContent;
-                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n---\n\n`;
+                markdown += `${chrome.i18n.getMessage('aiRole')}\n${htmlToMarkdown(content)}\n\n---\n\n`;
             }
         });
     }
 
-    return markdown || 'No conversation found.';
+    return markdown || chrome.i18n.getMessage('noConversationFound');
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

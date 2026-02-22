@@ -1,0 +1,202 @@
+{
+  "appName": {
+    "message": "ChatGPT & Gemini Markdown Copy"
+  },
+  "appDescription": {
+    "message": "为 ChatGPT 和 Gemini 回复添加 Markdown 复制按钮"
+  },
+  "exportConversation": {
+    "message": "导出对话"
+  },
+  "exportAsMarkdown": {
+    "message": "导出为 Markdown"
+  },
+  "exporting": {
+    "message": "正在导出..."
+  },
+  "noActiveTab": {
+    "message": "未找到活动标签页"
+  },
+  "exportSuccess": {
+    "message": "导出成功！"
+  },
+  "noContentReceived": {
+    "message": "未收到内容"
+  },
+  "exportFailed": {
+    "message": "导出失败："
+  },
+  "exportFailedRefresh": {
+    "message": "导出失败。请刷新页面重试。"
+  },
+  "settingsTitle": {
+    "message": "ChatGPT & Gemini Markdown Copy - 设置"
+  },
+  "feedbackTitle": {
+    "message": "📝 反馈"
+  },
+  "feedbackDescription": {
+    "message": "发现 bug 或有功能请求？请告诉我们！"
+  },
+  "feedbackType": {
+    "message": "类型："
+  },
+  "bugReport": {
+    "message": "Bug 报告"
+  },
+  "featureRequest": {
+    "message": "功能请求"
+  },
+  "selectorNotWorking": {
+    "message": "选择器失效"
+  },
+  "other": {
+    "message": "其他"
+  },
+  "messageLabel": {
+    "message": "消息："
+  },
+  "messagePlaceholder": {
+    "message": "描述问题或建议..."
+  },
+  "contactEmailLabel": {
+    "message": "联系邮箱（可选）："
+  },
+  "contactEmailPlaceholder": {
+    "message": "your@email.com (以便我们可以跟进)"
+  },
+  "emailHelpText": {
+    "message": "如果您希望收到回复，请提供您的邮箱。不会存储在任何地方。"
+  },
+  "includeSystemInfo": {
+    "message": "包含系统信息（扩展版本、浏览器、URL）"
+  },
+  "previewTitle": {
+    "message": "提交内容预览："
+  },
+  "submitFeedback": {
+    "message": "提交反馈"
+  },
+  "openGithubIssues": {
+    "message": "打开 GitHub Issues"
+  },
+  "advancedSettings": {
+    "message": "⚙️ 高级设置"
+  },
+  "advancedSettingsDesc": {
+    "message": "如果网站更新后扩展停止工作，请自定义 CSS 选择器。警告：除非您知道自己在做什么，否则请勿修改这些内容！"
+  },
+  "chatgptSelectors": {
+    "message": "ChatGPT 选择器"
+  },
+  "geminiSelectors": {
+    "message": "Gemini 选择器"
+  },
+  "messageContainer": {
+    "message": "消息容器："
+  },
+  "buttonContainer": {
+    "message": "按钮容器："
+  },
+  "copyButton": {
+    "message": "复制按钮："
+  },
+  "contentSelector": {
+    "message": "内容："
+  },
+  "messageSelectorHelp": {
+    "message": "每轮对话的选择器"
+  },
+  "buttonContainerSelectorHelp": {
+    "message": "复制按钮所在的容器"
+  },
+  "copyButtonSelectorHelp": {
+    "message": "原生复制按钮选择器"
+  },
+  "contentSelectorHelp": {
+    "message": "Markdown 内容容器"
+  },
+  "saveSettings": {
+    "message": "保存设置"
+  },
+  "resetDefaults": {
+    "message": "恢复默认"
+  },
+  "testSelectors": {
+    "message": "测试选择器"
+  },
+  "debugOptions": {
+    "message": "🐛 调试选项"
+  },
+  "enableDomSnapshot": {
+    "message": "启用错误时的 DOM 快照（用于 bug 报告）"
+  },
+  "domSnapshotHelp": {
+    "message": "在报告错误时包含经过清理的页面结构"
+  },
+  "saveDebugSettings": {
+    "message": "保存调试设置"
+  },
+  "privacyPolicy": {
+    "message": "隐私政策"
+  },
+  "license": {
+    "message": "许可证"
+  },
+  "errorSavingSettings": {
+    "message": "保存设置时出错："
+  },
+  "settingsSaved": {
+    "message": "设置已保存！请刷新 ChatGPT/Gemini 页面。"
+  },
+  "confirmReset": {
+    "message": "将所有选择器恢复为默认值？"
+  },
+  "resetSuccess": {
+    "message": "已恢复默认值。请刷新 ChatGPT/Gemini 页面。"
+  },
+  "promptPlatform": {
+    "message": "测试哪个平台？(chatgpt/gemini)"
+  },
+  "invalidPlatform": {
+    "message": "无效的平台。请输入 \"chatgpt\" 或 \"gemini\"。"
+  },
+  "openingPlatform": {
+    "message": "正在打开 $1... 请查看控制台以获取选择器测试结果。",
+    "placeholders": {
+      "platform": {
+        "content": "$1"
+      }
+    }
+  },
+  "enterFeedback": {
+    "message": "请输入您的反馈消息。"
+  },
+  "openingGithub": {
+    "message": "正在打开 GitHub 提交您的反馈..."
+  },
+  "errorSavingDebug": {
+    "message": "保存调试选项时出错："
+  },
+  "debugSaved": {
+    "message": "调试选项已保存！请刷新 ChatGPT/Gemini 页面。"
+  },
+  "copyAsMarkdown": {
+    "message": "复制为 Markdown"
+  },
+  "cantFindMessageBody": {
+    "message": "找不到消息体"
+  },
+  "userRole": {
+    "message": "**用户：**"
+  },
+  "aiRole": {
+    "message": "**AI：**"
+  },
+  "noConversationFound": {
+    "message": "未找到对话。"
+  },
+  "version": {
+      "message": "版本"
+  }
+}
