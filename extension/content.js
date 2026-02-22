@@ -38,7 +38,8 @@ const DEFAULT_PLATFORM_CONFIG = {
     chatgpt: {
         messageSelector: '[data-testid^="conversation-turn"]',
         buttonContainerSelector: '.flex.flex-wrap.items-center',
-        copyButtonSelector: '[aria-label="Copy"]',
+        copyButtonSelector: '[aria-label="Copy"], [aria-label="复制"], [aria-label="複製"], [aria-label="Copiar"], [aria-label="Copier"], [aria-label="Kopieren"], [aria-label="Copia"], [aria-label="Копировать"], [aria-label="コピー"], [aria-label="복사"]',
+        fallbackCopyButtonSelector: '#thread article > div > div > div:last-child > div > button:first-child',
         contentSelector: '.markdown.prose',
         getButtonContainer: (copyButton) => copyButton.parentNode
     },
@@ -64,6 +65,7 @@ function loadCustomSelectors(callback) {
                 messageSelector: platformSelectors.messageSelector || defaultSelectors.messageSelector,
                 buttonContainerSelector: platformSelectors.buttonContainerSelector || defaultSelectors.buttonContainerSelector,
                 copyButtonSelector: platformSelectors.copyButtonSelector || defaultSelectors.copyButtonSelector,
+                fallbackCopyButtonSelector: platformSelectors.fallbackCopyButtonSelector || defaultSelectors.fallbackCopyButtonSelector,
                 contentSelector: platformSelectors.contentSelector || defaultSelectors.contentSelector,
                 getButtonContainer: defaultSelectors.getButtonContainer
             };
@@ -256,7 +258,7 @@ function htmlToMarkdown(element) {
 }
 
 // Modified addMarkdownCopyButton, no longer disconnecting observer
-function addMarkdownCopyButton(buttonContainer) {
+function addMarkdownCopyButton(buttonContainer, directCopyButton = null) {
     // Generate unique identifier
     const containerId = buttonContainer.getAttribute('data-md-id') || Math.random().toString(36);
 
@@ -278,7 +280,17 @@ function addMarkdownCopyButton(buttonContainer) {
         return;
     }
 
-    const copyButton = buttonContainer.querySelector(config.copyButtonSelector);
+    let copyButton = directCopyButton || buttonContainer.querySelector(config.copyButtonSelector);
+    if (!copyButton && config.fallbackCopyButtonSelector) {
+        const fallbacks = document.querySelectorAll(config.fallbackCopyButtonSelector);
+        for (const btn of fallbacks) {
+            if (buttonContainer.contains(btn)) {
+                copyButton = btn;
+                break;
+            }
+        }
+    }
+
     if (!copyButton) {
         logError('[addMarkdownCopyButton] Copy button not found, selector:', config.copyButtonSelector);
         return;
@@ -364,9 +376,9 @@ function addMarkdownCopyButton(buttonContainer) {
         mdButton.appendChild(ripple2);
     }
 
-    mdButton.setAttribute('aria-label', 'Copy as Markdown');
+    mdButton.setAttribute('aria-label', chrome.i18n.getMessage('copyAsMarkdown'));
     mdButton.setAttribute('data-markdown-copy', 'true');
-    mdButton.setAttribute('title', 'Copy as Markdown');
+    mdButton.setAttribute('title', chrome.i18n.getMessage('copyAsMarkdown'));
 
     // Add click event
     mdButton.addEventListener('click', async () => {
@@ -424,7 +436,7 @@ function addMarkdownCopyButton(buttonContainer) {
                 logError('Failed to convert to markdown:', err);
             }
         } else {
-            const errorMsg = "Can't find message body";
+            const errorMsg = chrome.i18n.getMessage('cantFindMessageBody');
             logError(errorMsg);
         }
     });
@@ -459,14 +471,17 @@ function processExistingMessages() {
 
             // If no containers found, try finding copy buttons directly
             if (containers.length === 0) {
-                const copyButtons = document.querySelectorAll(config.copyButtonSelector);
+                let copyButtons = Array.from(document.querySelectorAll(config.copyButtonSelector));
+                if (copyButtons.length === 0 && config.fallbackCopyButtonSelector) {
+                    copyButtons = Array.from(document.querySelectorAll(config.fallbackCopyButtonSelector));
+                }
                 logInfo(`[processExistingMessages] Fallback: Found ${copyButtons.length} copy buttons`);
 
                 copyButtons.forEach(copyButton => {
                     const container = config.getButtonContainer(copyButton);
                     if (container && container.closest(config.messageSelector)) {
                         logInfo('[processExistingMessages] Adding button to container found via copy button');
-                        addMarkdownCopyButton(container);
+                        addMarkdownCopyButton(container, copyButton);
                     }
                 });
             } else {
@@ -529,12 +544,12 @@ function exportConversation() {
             const aiDiv = turn.querySelector('[data-message-author-role="assistant"]');
 
             if (userDiv) {
-                markdown += `**User:**\n${userDiv.innerText.trim()}\n\n`;
+                markdown += `${chrome.i18n.getMessage('userRole')}\n${userDiv.innerText.trim()}\n\n`;
             }
 
             if (aiDiv) {
                 const content = aiDiv.querySelector('.markdown') || aiDiv;
-                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n`;
+                markdown += `${chrome.i18n.getMessage('aiRole')}\n${htmlToMarkdown(content)}\n\n`;
             }
 
             if (userDiv || aiDiv) {
@@ -557,7 +572,7 @@ function exportConversation() {
                         .filter(text => text.length > 0)
                         .join('\n');
                     if (userText) {
-                        markdown += `**User:**\n${userText}\n\n`;
+                        markdown += `${chrome.i18n.getMessage('userRole')}\n${userText}\n\n`;
                     }
                 } else {
                     // Fallback: try query-text div or user-query-bubble-with-background
@@ -566,7 +581,7 @@ function exportConversation() {
                     if (queryText) {
                         const userText = queryText.textContent.trim();
                         if (userText) {
-                            markdown += `**User:**\n${userText}\n\n`;
+                            markdown += `${chrome.i18n.getMessage('userRole')}\n${userText}\n\n`;
                         }
                     }
                 }
@@ -577,12 +592,12 @@ function exportConversation() {
             if (messageContent) {
                 const markdownEl = messageContent.querySelector('.markdown');
                 const content = markdownEl || messageContent;
-                markdown += `**AI:**\n${htmlToMarkdown(content)}\n\n---\n\n`;
+                markdown += `${chrome.i18n.getMessage('aiRole')}\n${htmlToMarkdown(content)}\n\n---\n\n`;
             }
         });
     }
 
-    return markdown || 'No conversation found.';
+    return markdown || chrome.i18n.getMessage('noConversationFound');
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -633,7 +648,8 @@ async function init() {
                                     }
                                     // Also check for copy button directly (handles incremental rendering)
                                     if (node.matches?.(config.copyButtonSelector) ||
-                                        node.querySelector?.(config.copyButtonSelector)) {
+                                        node.querySelector?.(config.copyButtonSelector) ||
+                                        (config.fallbackCopyButtonSelector && (node.matches?.(config.fallbackCopyButtonSelector) || node.querySelector?.(config.fallbackCopyButtonSelector)))) {
                                         logInfo('[MutationObserver] Detected new copy button');
                                         hasNewButtons = true;
                                         break;

@@ -3,181 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT & Gemini Markdown Copy - Settings</title>
+    <title data-i18n="settingsTitle">ChatGPT & Gemini Markdown Copy - Settings</title>
     <link rel="stylesheet" href="options.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>ChatGPT & Gemini Markdown Copy</h1>
-            <p class="version">Version 2.0.0</p>
+            <h1 data-i18n="appName">ChatGPT & Gemini Markdown Copy</h1>
+            <p class="version"><span data-i18n="version">Version</span> 2.0.3</p>
         </header>
 
         <main>
             <!-- Feedback Section -->
             <section class="section">
-                <h2>📝 Feedback</h2>
-                <p class="description">
+                <h2 data-i18n="feedbackTitle">📝 Feedback</h2>
+                <p class="description" data-i18n="feedbackDescription">
                     Found a bug or have a feature request? Let us know!
                 </p>
                 <div class="form-group">
-                    <label for="feedback-type">Type:</label>
+                    <label for="feedback-type" data-i18n="feedbackType">Type:</label>
                     <select id="feedback-type">
-                        <option value="bug">Bug Report</option>
-                        <option value="feature">Feature Request</option>
-                        <option value="selector">Selector Not Working</option>
-                        <option value="other">Other</option>
+                        <option value="bug" data-i18n="bugReport">Bug Report</option>
+                        <option value="feature" data-i18n="featureRequest">Feature Request</option>
+                        <option value="selector" data-i18n="selectorNotWorking">Selector Not Working</option>
+                        <option value="other" data-i18n="other">Other</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="feedback-text">Message:</label>
+                    <label for="feedback-text" data-i18n="messageLabel">Message:</label>
                     <textarea
                         id="feedback-text"
                         rows="6"
+                        data-i18n-placeholder="messagePlaceholder"
                         placeholder="Describe the issue or suggestion..."
                     ></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="contact-email">Contact Email (Optional):</label>
+                    <label for="contact-email" data-i18n="contactEmailLabel">Contact Email (Optional):</label>
                     <input
                         type="email"
                         id="contact-email"
+                        data-i18n-placeholder="contactEmailPlaceholder"
                         placeholder="your@email.com (so I can follow up with you)"
                     >
-                    <span class="help-text">Provide your email if you want a response. Not stored anywhere.</span>
+                    <span class="help-text" data-i18n="emailHelpText">Provide your email if you want a response. Not stored anywhere.</span>
                 </div>
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="include-info" checked>
-                        Include system info (extension version, browser, URL)
+                        <span data-i18n="includeSystemInfo">Include system info (extension version, browser, URL)</span>
                     </label>
                 </div>
                 <div id="feedback-preview" class="feedback-preview" style="display: none;">
-                    <h4>Preview of what will be submitted:</h4>
+                    <h4 data-i18n="previewTitle">Preview of what will be submitted:</h4>
                     <pre id="preview-content"></pre>
                 </div>
-                <button id="submit-feedback" class="btn btn-primary">Submit Feedback</button>
-                <button id="github-link" class="btn btn-secondary">Open GitHub Issues</button>
+                <button id="submit-feedback" class="btn btn-primary" data-i18n="submitFeedback">Submit Feedback</button>
+                <button id="github-link" class="btn btn-secondary" data-i18n="openGithubIssues">Open GitHub Issues</button>
                 <div id="feedback-status" class="status-message"></div>
             </section>
 
             <!-- Advanced Settings Section -->
             <section class="section">
-                <h2>⚙️ Advanced Settings</h2>
-                <p class="description">
+                <h2 data-i18n="advancedSettings">⚙️ Advanced Settings</h2>
+                <p class="description" data-i18n="advancedSettingsDesc">
                     Customize CSS selectors if the extension stops working after a website update.
                     <strong>Warning:</strong> Only modify these if you know what you're doing!
                 </p>
 
                 <!-- ChatGPT Selectors -->
                 <div class="platform-config">
-                    <h3>ChatGPT Selectors</h3>
+                    <h3 data-i18n="chatgptSelectors">ChatGPT Selectors</h3>
                     <div class="form-group">
-                        <label for="chatgpt-message">Message Container:</label>
+                        <label for="chatgpt-message" data-i18n="messageContainer">Message Container:</label>
                         <input
                             type="text"
                             id="chatgpt-message"
                             class="selector-input"
                             placeholder='[data-testid^="conversation-turn"]'
                         >
-                        <span class="help-text">Selector for each message turn</span>
+                        <span class="help-text" data-i18n="messageSelectorHelp">Selector for each message turn</span>
                     </div>
                     <div class="form-group">
-                        <label for="chatgpt-button-container">Button Container:</label>
+                        <label for="chatgpt-button-container" data-i18n="buttonContainer">Button Container:</label>
                         <input
                             type="text"
                             id="chatgpt-button-container"
                             class="selector-input"
                             placeholder=".flex.flex-wrap.items-center"
                         >
-                        <span class="help-text">Container where copy button lives</span>
+                        <span class="help-text" data-i18n="buttonContainerSelectorHelp">Container where copy button lives</span>
                     </div>
                     <div class="form-group">
-                        <label for="chatgpt-copy-button">Copy Button:</label>
+                        <label for="chatgpt-copy-button" data-i18n="copyButton">Copy Button:</label>
                         <input
                             type="text"
                             id="chatgpt-copy-button"
                             class="selector-input"
                             placeholder='[aria-label="Copy"]'
                         >
-                        <span class="help-text">Native copy button selector</span>
+                        <span class="help-text" data-i18n="copyButtonSelectorHelp">Native copy button selector</span>
                     </div>
                     <div class="form-group">
-                        <label for="chatgpt-content">Content:</label>
+                        <label for="chatgpt-content" data-i18n="contentSelector">Content:</label>
                         <input
                             type="text"
                             id="chatgpt-content"
                             class="selector-input"
                             placeholder=".markdown.prose"
                         >
-                        <span class="help-text">Markdown content container</span>
+                        <span class="help-text" data-i18n="contentSelectorHelp">Markdown content container</span>
                     </div>
                 </div>
 
                 <!-- Gemini Selectors -->
                 <div class="platform-config">
-                    <h3>Gemini Selectors</h3>
+                    <h3 data-i18n="geminiSelectors">Gemini Selectors</h3>
                     <div class="form-group">
-                        <label for="gemini-message">Message Container:</label>
+                        <label for="gemini-message" data-i18n="messageContainer">Message Container:</label>
                         <input
                             type="text"
                             id="gemini-message"
                             class="selector-input"
                             placeholder="message-content"
                         >
-                        <span class="help-text">Selector for each message</span>
+                        <span class="help-text" data-i18n="messageSelectorHelp">Selector for each message</span>
                     </div>
                     <div class="form-group">
-                        <label for="gemini-button-container">Button Container:</label>
+                        <label for="gemini-button-container" data-i18n="buttonContainer">Button Container:</label>
                         <input
                             type="text"
                             id="gemini-button-container"
                             class="selector-input"
                             placeholder="copy-button"
                         >
-                        <span class="help-text">Container where copy button lives</span>
+                        <span class="help-text" data-i18n="buttonContainerSelectorHelp">Container where copy button lives</span>
                     </div>
                     <div class="form-group">
-                        <label for="gemini-copy-button">Copy Button:</label>
+                        <label for="gemini-copy-button" data-i18n="copyButton">Copy Button:</label>
                         <input
                             type="text"
                             id="gemini-copy-button"
                             class="selector-input"
                             placeholder='button[aria-label="Copy"]'
                         >
-                        <span class="help-text">Native copy button selector</span>
+                        <span class="help-text" data-i18n="copyButtonSelectorHelp">Native copy button selector</span>
                     </div>
                     <div class="form-group">
-                        <label for="gemini-content">Content:</label>
+                        <label for="gemini-content" data-i18n="contentSelector">Content:</label>
                         <input
                             type="text"
                             id="gemini-content"
                             class="selector-input"
                             placeholder=".markdown"
                         >
-                        <span class="help-text">Markdown content container</span>
+                        <span class="help-text" data-i18n="contentSelectorHelp">Markdown content container</span>
                     </div>
                 </div>
 
                 <div class="button-group">
-                    <button id="save-selectors" class="btn btn-primary">Save Settings</button>
-                    <button id="reset-selectors" class="btn btn-secondary">Reset to Default</button>
-                    <button id="test-selectors" class="btn btn-secondary">Test Selectors</button>
+                    <button id="save-selectors" class="btn btn-primary" data-i18n="saveSettings">Save Settings</button>
+                    <button id="reset-selectors" class="btn btn-secondary" data-i18n="resetDefaults">Reset to Default</button>
+                    <button id="test-selectors" class="btn btn-secondary" data-i18n="testSelectors">Test Selectors</button>
                 </div>
                 <div id="selector-status" class="status-message"></div>
             </section>
 
             <!-- Debug Section -->
             <section class="section">
-                <h2>🐛 Debug Options</h2>
+                <h2 data-i18n="debugOptions">🐛 Debug Options</h2>
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="enable-dom-snapshot">
-                        Enable DOM snapshots on errors (for bug reports)
+                        <span data-i18n="enableDomSnapshot">Enable DOM snapshots on errors (for bug reports)</span>
                     </label>
-                    <span class="help-text">Includes sanitized page structure when reporting errors</span>
+                    <span class="help-text" data-i18n="domSnapshotHelp">Includes sanitized page structure when reporting errors</span>
                 </div>
-                <button id="save-debug" class="btn btn-primary">Save Debug Settings</button>
+                <button id="save-debug" class="btn btn-primary" data-i18n="saveDebugSettings">Save Debug Settings</button>
                 <div id="debug-status" class="status-message"></div>
             </section>
         </main>
@@ -185,12 +187,12 @@
         <footer>
             <p>
                 <a href="https://github.com/bugparty/chatgpt_markdown_copy_extension" target="_blank">GitHub</a> |
-                <a href="https://github.com/bugparty/chatgpt_markdown_copy_extension/blob/main/PRIVACY.md" target="_blank">Privacy Policy</a> |
-                <a href="https://github.com/bugparty/chatgpt_markdown_copy_extension/blob/main/LICENSE" target="_blank">License</a>
+                <a href="https://github.com/bugparty/chatgpt_markdown_copy_extension/blob/main/PRIVACY.md" target="_blank" data-i18n="privacyPolicy">Privacy Policy</a> |
+                <a href="https://github.com/bugparty/chatgpt_markdown_copy_extension/blob/main/LICENSE" target="_blank" data-i18n="license">License</a>
             </p>
         </footer>
     </div>
-
+    <script src="i18n.js"></script>
     <script type="module" src="options.js"></script>
 </body>
 </html>
