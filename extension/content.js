@@ -18,8 +18,6 @@ function logError(...args) {
 }
 
 function logDebug(..._args) {
-    // Only log debug if needed or verbose
-    // console.debug('[Markdown Copy]', ...args);
 }
 
 // Detect current platform
