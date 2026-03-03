@@ -216,7 +216,10 @@ jobs:
 
       - name: Build Safari App
         run: |
-          xcodebuild -project "safari-build/ChatGPT Markdown Copy/ChatGPT Markdown Copy.xcodeproj" -scheme "ChatGPT Markdown Copy" -configuration Release build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+          # Find the scheme dynamically
+          SCHEME=$(xcodebuild -project "safari-build/ChatGPT Markdown Copy/ChatGPT Markdown Copy.xcodeproj" -list -json | jq -r '.project.schemes[0]')
+          echo "Found scheme: $SCHEME"
+          xcodebuild -project "safari-build/ChatGPT Markdown Copy/ChatGPT Markdown Copy.xcodeproj" -scheme "$SCHEME" -configuration Release build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
 
       - name: Zip Safari App
         run: |
