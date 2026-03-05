@@ -43,4 +43,6 @@ function localizeHtmlPage() {
 }
 
 // Run localization when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', localizeHtmlPage);
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', localizeHtmlPage);
+}
