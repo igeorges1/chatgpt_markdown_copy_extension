@@ -67,6 +67,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
 
+      - name: Build Extension
+        run: pnpm run build
+
       - name: Create build directory
         run: mkdir -p build
 
@@ -76,7 +79,7 @@ jobs:
           mkdir -p build/chrome-temp
 
           # Copy extension files
-          cp -r extension/* build/chrome-temp/
+          cp -r dist/* build/chrome-temp/
 
           # Remove Firefox-specific settings from manifest.json
           cd build/chrome-temp
@@ -100,7 +103,7 @@ jobs:
           mkdir -p build/firefox-artifacts
 
           # Copy extension files
-          cp -r extension/* build/firefox-temp/
+          cp -r dist/* build/firefox-temp/
 
           # Build using web-ext (this validates the extension too)
           cd build/firefox-temp
@@ -148,6 +151,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Extension
+        run: pnpm run build
+
       - name: Create build directory
         run: mkdir -p build
 
@@ -157,7 +177,7 @@ jobs:
           mkdir -p build/safari-temp
 
           # Copy extension files
-          cp -r extension/* build/safari-temp/
+          cp -r dist/* build/safari-temp/
 
           # Remove Firefox-specific settings from manifest.json
           cd build/safari-temp
