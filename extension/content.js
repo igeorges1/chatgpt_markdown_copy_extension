@@ -91,6 +91,11 @@ function loadCustomSelectors(callback) {
 function htmlToMarkdown(element) {
     function processNode(node, indent = '') {
         if (node.nodeType === Node.TEXT_NODE) {
+            // Ignore formatting-only newlines/indentation between block nodes, but
+            // preserve intentional inline spacing such as "foo <strong>bar</strong>".
+            if (!node.textContent.trim()) {
+                return node.textContent.includes('\n') ? '' : ' ';
+            }
             return node.textContent;
         }
 
@@ -218,7 +223,7 @@ function htmlToMarkdown(element) {
                         const isDisplay = node.classList.contains('katex-display') ||
                             node.parentElement?.classList.contains('katex-display');
                         if (isDisplay) {
-                            result = '\n$$\n' + mathAnnotation.textContent + '\n$$\n\n';
+                            result = '$$\n' + mathAnnotation.textContent + '\n$$\n\n';
                         } else {
                             result = '$' + mathAnnotation.textContent + '$';
                         }
@@ -229,7 +234,7 @@ function htmlToMarkdown(element) {
                     const mathContent = node.getAttribute('data-math');
                     if (mathContent) {
                         if (node.classList.contains('math-block')) {
-                            result = '\n$$\n' + mathContent + '\n$$\n\n';
+                            result = '$$\n' + mathContent + '\n$$\n\n';
                         } else {
                             result = '$' + mathContent + '$';
                         }
@@ -246,7 +251,7 @@ function htmlToMarkdown(element) {
                 if (node.classList.contains('math-block')) {
                     const mathContent = node.getAttribute('data-math');
                     if (mathContent) {
-                        result = '\n$$\n' + mathContent + '\n$$\n\n';
+                        result = '$$\n' + mathContent + '\n$$\n\n';
                     }
                 } else {
                     result = Array.from(node.childNodes).map(child => processNode(child, indent)).join('');
@@ -259,7 +264,13 @@ function htmlToMarkdown(element) {
         return result;
     }
 
-    return processNode(element).trim();
+    return normalizeMarkdown(processNode(element));
+}
+
+function normalizeMarkdown(markdown) {
+    return markdown
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
 }
 
 // Modified addMarkdownCopyButton, no longer disconnecting observer
