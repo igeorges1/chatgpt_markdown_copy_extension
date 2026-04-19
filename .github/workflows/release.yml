@@ -98,7 +98,7 @@ jobs:
           mkdir -p build/safari-temp
 
           # Copy extension files
-          cp -r extension/* build/safari-temp/
+          cp -r dist/* build/safari-temp/
 
           # Remove Firefox-specific settings from manifest.json
           cd build/safari-temp
