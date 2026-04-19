@@ -1,0 +1,123 @@
+name: Diagnose Chrome Upload Issue
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    name: Diagnose Chrome Web Store Upload
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Build Extension
+        run: pnpm run build
+
+      - name: Check manifest.json
+        run: |
+          echo "=== Checking manifest.json ==="
+          cat dist/manifest.json | jq '.'
+
+      - name: Check for key field in manifest
+        run: |
+          echo "=== Checking for 'key' field ==="
+          if cat dist/manifest.json | jq -e '.key' > /dev/null 2>&1; then
+            echo "✅ Key field found in manifest"
+            echo "Extension ID will be consistent"
+          else
+            echo "⚠️  No 'key' field found in manifest"
+            echo "Extension ID will change with each build"
+            echo ""
+            echo "This is likely causing the HTTP 400 error!"
+            echo ""
+            echo "Solution: Add a 'key' field to your manifest.json"
+            echo "See: https://developer.chrome.com/docs/extensions/mv3/manifest/key/"
+          fi
+
+      - name: Check version
+        run: |
+          echo "=== Extension Version ==="
+          cat dist/manifest.json | jq '.version'
+
+      - name: Create Chrome Package
+        run: |
+          mkdir -p build/chrome-temp
+          cp -r dist/* build/chrome-temp/
+
+          # Remove Firefox-specific settings
+          cd build/chrome-temp
+          jq 'del(.browser_specific_settings)' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+
+          # Create zip
+          zip -r ../chrome-extension.zip .
+
+          echo "=== Package created ==="
+          ls -lh ../chrome-extension.zip
+
+      - name: List package contents
+        run: |
+          echo "=== Package contents ==="
+          unzip -l build/chrome-extension.zip
+
+      - name: Test Chrome Web Store API Connection
+        run: |
+          echo "=== Testing Chrome Web Store API ==="
+          echo "Attempting to get access token..."
+
+          # Try to get an access token using the refresh token
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -d "client_id=${{ secrets.CHROME_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.CHROME_CLIENT_SECRET }}" \
+            -d "refresh_token=${{ secrets.CHROME_REFRESH_TOKEN }}" \
+            -d "grant_type=refresh_token" \
+            https://oauth2.googleapis.com/token)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ OAuth credentials are valid"
+          else
+            echo "❌ OAuth credentials are invalid or expired"
+            echo ""
+            echo "Please check your secrets:"
+            echo "- CHROME_CLIENT_ID"
+            echo "- CHROME_CLIENT_SECRET"
+            echo "- CHROME_REFRESH_TOKEN"
+          fi
+
+      - name: Extension ID Check
+        run: |
+          echo "=== Extension ID Check ==="
+          echo "Your configured CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}"
+          echo ""
+          echo "⚠️  To get the correct extension ID:"
+          echo "1. Go to Chrome Web Store Developer Dashboard"
+          echo "2. Find your extension"
+          echo "3. Copy the extension ID from the URL or item details"
+          echo ""
+          echo "If this is a new extension, you need to:"
+          echo "1. Upload it manually first to get an extension ID"
+          echo "2. Then add that ID to your secrets"
