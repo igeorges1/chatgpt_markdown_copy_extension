@@ -8,7 +8,6 @@ let processTimeout = null;
 // Global config variable (will be loaded from storage)
 let config = null;
 const DEFAULT_PLATFORM_SELECTORS = globalThis.DEFAULT_PLATFORM_SELECTORS;
-const htmlToMarkdown = globalThis.MarkdownCopy?.htmlToMarkdown;
 
 // Logging helpers
 function logInfo(...args) {
@@ -231,7 +230,7 @@ function addMarkdownCopyButton(buttonContainer, directCopyButton = null) {
 
         if (markdownContent) {
             try {
-                const markdown = htmlToMarkdown(markdownContent);
+                const markdown = globalThis.MarkdownCopy.htmlToMarkdown(markdownContent);
                 logDebug(markdown);
 
                 try {
@@ -380,7 +379,7 @@ function exportConversation() {
 
             if (aiDiv) {
                 const content = aiDiv.querySelector('.markdown') || aiDiv;
-                markdown += `${chrome.i18n.getMessage('aiRole')}\n${htmlToMarkdown(content)}\n\n`;
+                markdown += `${chrome.i18n.getMessage('aiRole')}\n${globalThis.MarkdownCopy.htmlToMarkdown(content)}\n\n`;
             }
 
             if (userDiv || aiDiv) {
@@ -423,7 +422,7 @@ function exportConversation() {
             if (messageContent) {
                 const markdownEl = messageContent.querySelector('.markdown');
                 const content = markdownEl || messageContent;
-                markdown += `${chrome.i18n.getMessage('aiRole')}\n${htmlToMarkdown(content)}\n\n---\n\n`;
+                markdown += `${chrome.i18n.getMessage('aiRole')}\n${globalThis.MarkdownCopy.htmlToMarkdown(content)}\n\n---\n\n`;
             }
         });
     }
