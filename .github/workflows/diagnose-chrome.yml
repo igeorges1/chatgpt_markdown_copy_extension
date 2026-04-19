@@ -99,6 +99,32 @@ jobs:
 
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✅ OAuth credentials are valid"
+
+            # Test Chrome Web Store API
+            ACCESS_TOKEN=$(echo "$BODY" | jq -r '.access_token')
+            echo ""
+            echo "=== Testing Chrome Web Store API ==="
+
+            API_RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -H "Authorization: Bearer $ACCESS_TOKEN" \
+              -H "x-goog-api-version: 2" \
+              "https://www.googleapis.com/chromewebstore/v1.1/items/${{ secrets.CHROME_EXTENSION_ID }}?projection=DRAFT")
+
+            API_HTTP_CODE=$(echo "$API_RESPONSE" | tail -n1)
+            API_BODY=$(echo "$API_RESPONSE" | sed '$d')
+
+            echo "API HTTP Status: $API_HTTP_CODE"
+            echo ""
+            echo "API Response:"
+            echo "$API_BODY" | jq '.' 2>/dev/null || echo "$API_BODY"
+
+            if [ "$API_HTTP_CODE" = "200" ]; then
+              echo ""
+              echo "✅ Chrome Web Store API is working!"
+            else
+              echo ""
+              echo "❌ Chrome Web Store API call failed"
+            fi
           else
             echo "❌ OAuth credentials are invalid or expired"
             echo ""
