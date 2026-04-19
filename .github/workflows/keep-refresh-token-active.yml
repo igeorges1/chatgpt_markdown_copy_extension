@@ -1,0 +1,85 @@
+name: Keep Refresh Token Active
+
+on:
+  schedule:
+    # Run every Tuesday at 00:00 UTC
+    - cron: '0 0 * * 2'
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    environment: publish
+
+    steps:
+      - name: Use Refresh Token
+        run: |
+          echo "=== Keeping Refresh Token Active ==="
+          echo "Running scheduled token refresh to prevent expiration"
+          echo ""
+
+          # Get access token using refresh token
+          RESPONSE=$(curl -s -X POST \
+            -d "client_id=${{ secrets.CHROME_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.CHROME_CLIENT_SECRET }}" \
+            -d "refresh_token=${{ secrets.CHROME_REFRESH_TOKEN }}" \
+            -d "grant_type=refresh_token" \
+            https://oauth2.googleapis.com/token)
+
+          ERROR=$(echo "$RESPONSE" | jq -r '.error' 2>/dev/null)
+
+          if [ -z "$ERROR" ] || [ "$ERROR" = "null" ]; then
+            echo "✅ Token refresh successful!"
+
+            ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+            EXPIRES_IN=$(echo "$RESPONSE" | jq -r '.expires_in')
+            REFRESH_EXPIRES=$(echo "$RESPONSE" | jq -r '.refresh_token_expires_in')
+
+            echo ""
+            echo "Token Details:"
+            echo "  - Access token expires in: $EXPIRES_IN seconds (~1 hour)"
+            echo "  - Refresh token expires in: $REFRESH_EXPIRES seconds (~7 days)"
+
+            # Optional: Test Chrome Web Store API
+            echo ""
+            echo "=== Testing Chrome Web Store API ==="
+            API_RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -H "Authorization: Bearer $ACCESS_TOKEN" \
+              -H "x-goog-api-version: 2" \
+              "https://www.googleapis.com/chromewebstore/v1.1/items/${{ secrets.CHROME_EXTENSION_ID }}?projection=DRAFT")
+
+            API_HTTP_CODE=$(echo "$API_RESPONSE" | tail -n1)
+
+            if [ "$API_HTTP_CODE" = "200" ]; then
+              echo "✅ Chrome Web Store API is accessible"
+            else
+              echo "⚠️  Chrome Web Store API returned: $API_HTTP_CODE"
+              echo "But token refresh was successful, so credentials are valid"
+            fi
+
+            echo ""
+            echo "=== Summary ==="
+            echo "✅ Refresh token has been used and reset its 7-day expiry timer"
+            echo "✅ Next scheduled run: Next Tuesday at 00:00 UTC"
+          else
+            echo "❌ Token refresh failed"
+            echo "Error: $ERROR"
+            echo ""
+            echo "Response:"
+            echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
+            echo ""
+            echo "⚠️  Action required: Generate new refresh token"
+            echo "Run: npx chrome-webstore-upload-keys"
+            exit 1
+          fi
+
+      - name: Create status summary
+        if: always()
+        run: |
+          echo "## Token Refresh Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Scheduled run to keep Chrome Web Store refresh token active." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Schedule**: Every Tuesday at 00:00 UTC" >> $GITHUB_STEP_SUMMARY
+          echo "- **Purpose**: Reset 7-day refresh token expiry timer" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
