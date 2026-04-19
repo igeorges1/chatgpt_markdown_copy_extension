@@ -36,6 +36,19 @@
 
 ## 已修复的问题
 
+### ✅ 2026-04-19: Chrome 扩展改为草稿发布
+
+**改进**：
+- 将 Chrome 扩展发布改为草稿模式（`publish: false`）
+- 允许在公开发布前进行审核
+- Firefox 保持原有的直接发布逻辑
+
+**修改**：
+- 步骤名称：`Upload to Chrome Web Store` → `Upload to Chrome Web Store as Draft`
+- 参数：`publish: true` → `publish: false`
+
+**提交**: `42b11c1` - "Change Chrome extension publish to draft mode"
+
 ### ✅ 2026-04-19: Firefox 发布缺少依赖
 
 **问题**：
