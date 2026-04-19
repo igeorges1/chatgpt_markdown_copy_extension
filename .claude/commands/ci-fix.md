@@ -13,17 +13,44 @@ Check the latest GitHub Actions CI status. If there are failures, automatically 
 
 ## Workflow
 
-1. **Check CI Status**: Get the latest workflow run for the target branch
-2. **Analyze Failures**: If CI failed, fetch and analyze the failure logs
+1. **Check CI Status**: Use `gh run list` to get the latest workflow run for the target branch
+2. **Analyze Failures**: If CI failed, use `gh run view <run-id> --log-failed` to fetch and analyze logs
 3. **Categorize Issues**: Identify the type of failure:
-   - Dependency/Build errors (missing packages, compilation errors)
-   - Test failures (unit tests, integration tests)
-4. **Auto-Fix**: Attempt to fix identified issues
-5. **Commit**: Commit fixes directly to current branch with descriptive message
+   - **Dependency/Build errors**: Missing packages, compilation errors, missing files
+   - **Test failures**: Unit tests, integration tests
+   - **Workflow configuration errors**: Missing steps, incorrect action versions
+4. **Auto-Fix**: Attempt to fix identified issues:
+   - For missing files: Add checkout steps, fix paths
+   - For dependency errors: Update package.json, lock files
+   - For test failures: Analyze test output and fix code
+   - For workflow errors: Fix YAML syntax, update action versions
+5. **Commit**: Commit fixes directly to current branch with message:
+   ```
+   Fix GitHub Actions <issue-type>
+   
+   <detailed-description>
+   
+   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+   ```
 6. **Report**: Summarize what was fixed and next steps
+
+## Common CI Issues This Can Fix
+
+- Missing `actions/checkout` step
+- Incorrect file paths in workflows
+- Missing lock files (pnpm-lock.yaml, package-lock.json)
+- Build script errors
+- Test failures
+- Deprecated action versions
 
 ## Examples
 
 - `/ci-fix` - Check current branch CI
 - `/ci-fix main` - Check main branch CI
 - `/ci-fix feature/my-feature` - Check specific branch CI
+
+## Limitations
+
+- Cannot fix secrets/credential issues (requires GitHub settings update)
+- Cannot fix external service issues (Chrome Web Store API, etc.)
+- Cannot fix issues in protected branches (requires PR workflow)

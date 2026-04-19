@@ -374,7 +374,8 @@ function exportConversation() {
             const aiDiv = turn.querySelector('[data-message-author-role="assistant"]');
 
             if (userDiv) {
-                markdown += `${chrome.i18n.getMessage('userRole')}\n${userDiv.innerText.trim()}\n\n`;
+                const userText = (userDiv.innerText || userDiv.textContent || '').trim();
+                markdown += `${chrome.i18n.getMessage('userRole')}\n${userText}\n\n`;
             }
 
             if (aiDiv) {
