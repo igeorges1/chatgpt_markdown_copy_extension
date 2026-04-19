@@ -7,6 +7,7 @@ const processingQueue = new Set();
 let processTimeout = null;
 // Global config variable (will be loaded from storage)
 let config = null;
+const DEFAULT_PLATFORM_SELECTORS = globalThis.DEFAULT_PLATFORM_SELECTORS;
 
 // Logging helpers
 function logInfo(...args) {
@@ -34,21 +35,25 @@ function detectPlatform() {
 // Default platform configuration
 const DEFAULT_PLATFORM_CONFIG = {
     chatgpt: {
-        messageSelector: '[data-testid^="conversation-turn"]',
-        buttonContainerSelector: '.flex.flex-wrap.items-center',
-        copyButtonSelector: '[aria-label="Copy"], [aria-label="复制"], [aria-label="複製"], [aria-label="Copiar"], [aria-label="Copier"], [aria-label="Kopieren"], [aria-label="Copia"], [aria-label="Копировать"], [aria-label="コピー"], [aria-label="복사"]',
-        fallbackCopyButtonSelector: '#thread article > div > div > div:last-child > div > button:first-child',
-        contentSelector: '.markdown.prose',
+        ...DEFAULT_PLATFORM_SELECTORS.chatgpt,
         getButtonContainer: (copyButton) => copyButton.parentNode
     },
     gemini: {
-        messageSelector: 'message-content',
-        buttonContainerSelector: 'copy-button',
-        copyButtonSelector: 'button[data-test-id="copy-button"]',
-        contentSelector: '.markdown',
+        ...DEFAULT_PLATFORM_SELECTORS.gemini,
         getButtonContainer: (copyButton) => copyButton.closest('copy-button')
     }
 };
+
+function mergeSelectors(...selectorGroups) {
+    const selectors = selectorGroups
+        .filter(Boolean)
+        .flatMap(group => group.split(','))
+        .map(selector => selector.trim())
+        .filter(Boolean);
+
+    return [...new Set(selectors)].join(', ');
+}
+
 // Load custom selectors from storage
 function loadCustomSelectors(callback) {
     if (typeof chrome !== 'undefined' && chrome.storage) {
@@ -62,7 +67,9 @@ function loadCustomSelectors(callback) {
             config = {
                 messageSelector: platformSelectors.messageSelector || defaultSelectors.messageSelector,
                 buttonContainerSelector: platformSelectors.buttonContainerSelector || defaultSelectors.buttonContainerSelector,
-                copyButtonSelector: platformSelectors.copyButtonSelector || defaultSelectors.copyButtonSelector,
+                copyButtonSelector: currentPlatform === 'chatgpt'
+                    ? mergeSelectors(platformSelectors.copyButtonSelector, defaultSelectors.copyButtonSelector)
+                    : (platformSelectors.copyButtonSelector || defaultSelectors.copyButtonSelector),
                 fallbackCopyButtonSelector: platformSelectors.fallbackCopyButtonSelector || defaultSelectors.fallbackCopyButtonSelector,
                 contentSelector: platformSelectors.contentSelector || defaultSelectors.contentSelector,
                 getButtonContainer: defaultSelectors.getButtonContainer
