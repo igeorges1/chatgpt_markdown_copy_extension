@@ -5,7 +5,7 @@ on:
 
 jobs:
   diagnose:
-    name: Diagnose Chrome Web Store Upload
+    name: Diagnose Chrome Web Store Setup
     runs-on: ubuntu-latest
     environment: publish
     steps:
@@ -28,6 +28,68 @@ jobs:
           pnpm install --frozen-lockfile
           sudo apt-get update && sudo apt-get install -y jq
 
+      # Step 1: Verify Secrets
+      - name: Check CHROME_CLIENT_ID
+        env:
+          CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+        run: |
+          echo "=== Checking CHROME_CLIENT_ID ==="
+          if [ -z "$CLIENT_ID" ]; then
+            echo "❌ CHROME_CLIENT_ID is EMPTY"
+          else
+            echo "✅ CHROME_CLIENT_ID has a value"
+            echo "Length: ${#CLIENT_ID} characters"
+            echo "Last 30 chars: ***${CLIENT_ID: -30}"
+          fi
+
+      - name: Check CHROME_CLIENT_SECRET
+        env:
+          CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+        run: |
+          echo "=== Checking CHROME_CLIENT_SECRET ==="
+          if [ -z "$CLIENT_SECRET" ]; then
+            echo "❌ CHROME_CLIENT_SECRET is EMPTY"
+            echo "Action required: Set this secret in GitHub"
+          elif [ "$CLIENT_SECRET" = " " ] || [ "$CLIENT_SECRET" = "  " ]; then
+            echo "❌ CHROME_CLIENT_SECRET is only WHITESPACE"
+            echo "Action required: Set this secret with the actual value"
+          else
+            echo "✅ CHROME_CLIENT_SECRET has a value"
+            echo "Length: ${#CLIENT_SECRET} characters"
+            echo "First 3 chars: ${CLIENT_SECRET:0:3}***"
+          fi
+
+      - name: Check CHROME_REFRESH_TOKEN
+        env:
+          REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: |
+          echo "=== Checking CHROME_REFRESH_TOKEN ==="
+          if [ -z "$REFRESH_TOKEN" ]; then
+            echo "❌ CHROME_REFRESH_TOKEN is EMPTY"
+            echo "Action required: Generate and set this secret"
+          elif [ "$REFRESH_TOKEN" = " " ] || [ "$REFRESH_TOKEN" = "  " ]; then
+            echo "❌ CHROME_REFRESH_TOKEN is only WHITESPACE"
+            echo "Action required: Set this secret with the actual value"
+          else
+            echo "✅ CHROME_REFRESH_TOKEN has a value"
+            echo "Length: ${#REFRESH_TOKEN} characters"
+            echo "First 10 chars: ${REFRESH_TOKEN:0:10}***"
+          fi
+
+      - name: Check CHROME_EXTENSION_ID
+        env:
+          EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+        run: |
+          echo "=== Checking CHROME_EXTENSION_ID ==="
+          if [ -z "$EXTENSION_ID" ]; then
+            echo "❌ CHROME_EXTENSION_ID is EMPTY"
+          else
+            echo "✅ CHROME_EXTENSION_ID has a value"
+            echo "Length: ${#EXTENSION_ID} characters"
+            echo "Value: $EXTENSION_ID"
+          fi
+
+      # Step 2: Build Extension
       - name: Build Extension
         run: pnpm run build
 
@@ -121,9 +183,19 @@ jobs:
             if [ "$API_HTTP_CODE" = "200" ]; then
               echo ""
               echo "✅ Chrome Web Store API is working!"
+              echo ""
+              echo "Extension details:"
+              echo "$API_BODY" | jq '{id: .id, title: .title, version: .version}' 2>/dev/null || echo "$API_BODY"
             else
               echo ""
               echo "❌ Chrome Web Store API call failed"
+              echo ""
+              echo "Response:"
+              echo "$API_BODY" | jq '.' 2>/dev/null || echo "$API_BODY"
+              ERROR_MSG=$(echo "$API_BODY" | jq -r '.error.message' 2>/dev/null)
+              if [ -n "$ERROR_MSG" ] && [ "$ERROR_MSG" != "null" ]; then
+                echo "Error: $ERROR_MSG"
+              fi
             fi
           else
             echo "❌ OAuth credentials are invalid or expired"
