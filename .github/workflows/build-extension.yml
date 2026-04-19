@@ -42,9 +42,34 @@ jobs:
       - name: Run web-ext lint
         run: pnpm run lint:web-ext
 
-  build-chrome-firefox:
+  test:
     runs-on: ubuntu-latest
     needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: node --test tests/*.test.js
+
+  build-chrome-firefox:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
 
     steps:
       - name: Checkout code
@@ -143,7 +168,7 @@ jobs:
 
   build-safari:
     runs-on: macos-latest
-    needs: lint
+    needs: [lint, test]
 
     steps:
       - name: Checkout code
