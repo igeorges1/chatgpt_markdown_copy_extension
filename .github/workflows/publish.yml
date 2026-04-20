@@ -75,7 +75,7 @@ jobs:
           name: chrome-extension
           path: build
 
-      - name: Upload to Chrome Web Store as Draft
+      - name: Upload to Chrome Web Store
         uses: mnao305/chrome-extension-upload@v5.0.0
         with:
           file-path: build/chrome-extension.zip
@@ -83,7 +83,7 @@ jobs:
           client-id: ${{ secrets.CHROME_CLIENT_ID }}
           client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
           refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: false
+          publish: true
 
   publish-firefox:
     name: Publish to Firefox Add-ons
