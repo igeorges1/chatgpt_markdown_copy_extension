@@ -186,6 +186,11 @@ function addMarkdownCopyButton(buttonContainer, directCopyButton = null) {
         mdWrapper.setAttribute('data-markdown-copy', 'true');
         mdWrapper.removeAttribute('data-md-id');
 
+        // Remove all id and data-md-id attributes from cloned descendants to avoid duplicates
+        mdWrapper.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+        mdWrapper.querySelectorAll('[data-md-id]').forEach(el => el.removeAttribute('data-md-id'));
+
+
         mdButton = mdWrapper.querySelector('button');
         const matIcon = mdWrapper.querySelector('mat-icon');
         const tooltipEl = mdWrapper.querySelector('[gemtooltip]');
