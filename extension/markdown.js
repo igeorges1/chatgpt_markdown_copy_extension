@@ -66,7 +66,7 @@ function htmlToMarkdown(element) {
                 let titleText = normalizeInline(processNode(strongNode));
                 // Extract clean text inside strong tag, stripping asterisks and trailing colons
                 let cleanTitle = titleText.replace(/:?\*\*$/, '').replace(/^\*\*/, '').trim();
-                
+
                 // Clone node and remove strongNode to extract subtitle text
                 const cloned = node.cloneNode(true);
                 const clonedStrong = cloned.querySelector('strong, b');
@@ -75,17 +75,17 @@ function htmlToMarkdown(element) {
                 }
                 let subtitleText = normalizeInline(cloned.textContent).trim();
                 let cleanSubtitle = subtitleText.replace(/^\*+/, '').replace(/\*+$/, '').replace(/\.$/, '').trim();
-                
+
                 let markdown = '';
                 if (cleanTitle) {
-                    markdown += '**' + cleanTitle + '**\n';
+                    markdown += '**' + cleanTitle + '**  \n';
                 }
                 if (cleanSubtitle) {
                     markdown += '*' + cleanSubtitle + '*';
                 }
                 return markdown + '\n\n';
             }
-            
+
             const rawText = Array.from(node.childNodes).map(child => processNode(child, indent)).join('');
             const text = rawText.replace(/(?<=[^\s*])\*\*(?=[a-zA-Z0-9])/g, '** ');
             return normalizeInline(text) + '\n\n';
