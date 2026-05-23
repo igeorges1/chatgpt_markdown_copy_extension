@@ -7,7 +7,22 @@ function htmlToMarkdown(element) {
     }
 
     function normalizeTex(text) {
-        return text.replace(/\s+/g, ' ').trim();
+        return text
+            .replace(/>/g, '\\gt ')
+            .replace(/</g, '\\lt ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function decodeHtmlEntities(text) {
+        if (!text) return '';
+        return text
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&nbsp;/g, ' ');
     }
 
     function escapeTableCell(text) {
@@ -167,19 +182,21 @@ function htmlToMarkdown(element) {
                     if (mathAnnotation) {
                         const isDisplay = node.classList.contains('katex-display') ||
                             node.parentElement?.classList.contains('katex-display');
+                        const mathText = decodeHtmlEntities(mathAnnotation.textContent);
                         if (isDisplay) {
-                            result = '$$\n' + normalizeTex(mathAnnotation.textContent) + '\n$$\n\n';
+                            result = '$$\n' + normalizeTex(mathText) + '\n$$\n\n';
                         } else {
-                            result = '$' + normalizeTex(mathAnnotation.textContent) + '$';
+                            result = '$' + normalizeTex(mathText) + '$';
                         }
                     }
                 } else if (node.classList.contains('math-inline') || node.classList.contains('math-block')) {
                     const mathContent = node.getAttribute('data-math');
                     if (mathContent) {
+                        const mathText = decodeHtmlEntities(mathContent);
                         if (node.classList.contains('math-block')) {
-                            result = '$$\n' + normalizeTex(mathContent) + '\n$$\n\n';
+                            result = '$$\n' + normalizeTex(mathText) + '\n$$\n\n';
                         } else {
-                            result = '$' + normalizeTex(mathContent) + '$';
+                            result = '$' + normalizeTex(mathText) + '$';
                         }
                     }
                 } else if ((node.hasAttribute('data-state') && node.getAttribute('data-state') === 'closed') ||
@@ -214,7 +231,8 @@ function htmlToMarkdown(element) {
                 if (node.classList.contains('math-block')) {
                     const mathContent = node.getAttribute('data-math');
                     if (mathContent) {
-                        result = '$$\n' + normalizeTex(mathContent) + '\n$$\n\n';
+                        const mathText = decodeHtmlEntities(mathContent);
+                        result = '$$\n' + normalizeTex(mathText) + '\n$$\n\n';
                     }
                 } else {
                     result = Array.from(node.childNodes).map(child => processNode(child, indent)).join('');

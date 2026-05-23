@@ -124,3 +124,21 @@ test('New Gemini Q&A UI: copyButtonSelector matches and addMarkdownCopyButton ex
     assert.strictEqual(clonedIconSvg.getAttribute('width'), '20', 'Cloned SVG should have width 20');
     assert.strictEqual(clonedIconSvg.getAttribute('height'), '20', 'Cloned SVG should have height 20');
 });
+
+test('Markdown parsing decodes math entities like &gt; into mathematical > operators', () => {
+    const html = fs.readFileSync(fixturePath, 'utf8');
+    const dom = new JSDOM(html, {
+        url: 'https://gemini.google.com/'
+    });
+
+    const window = dom.window;
+    loadContentScript(window);
+
+    // Find the math element containing the >180 formula
+    const mathSpan = window.document.querySelector('.math-inline[data-math*="180"]');
+    assert.ok(mathSpan, 'Should find the target math span in the new Gemini UI fixture');
+
+    // Parse the span to Markdown
+    const markdown = window.MarkdownCopy.htmlToMarkdown(mathSpan);
+    assert.strictEqual(markdown, '$\\gt 180^\\circ\\text{C}$', 'Formula should be parsed with decoded mathematical \\gt operator');
+});
