@@ -142,3 +142,76 @@ test('Markdown parsing decodes math entities like &gt; into mathematical > opera
     const markdown = window.MarkdownCopy.htmlToMarkdown(mathSpan);
     assert.strictEqual(markdown, '$\\gt 180^\\circ\\text{C}$', 'Formula should be parsed with decoded mathematical \\gt operator');
 });
+
+test('Markdown parsing formats Gemini step-by-step sequence elements beautifully even when wrapped in a paragraph', () => {
+    const dom = new JSDOM(`
+        <p data-path-to-node="10"></p>
+    `);
+
+    const window = dom.window;
+    const document = window.document;
+
+    const sequenceDom = new JSDOM(`
+        <sequence class="lm-enabled ng-star-inserted">
+            <div class="sequence-container">
+                <div class="sequence-event">
+                    <div hide-from-message-actions="" class="sequence-event-marker-container hide-from-message-actions">
+                        <div class="sequence-event-marker">1</div>
+                    </div>
+                    <div class="sequence-event-content">
+                        <div hide-from-message-actions="" class="hide-from-message-actions">
+                            <div class="sequence-event-title">Dry Dusting</div>
+                            <div class="sequence-event-subtitle">Step 1: Eliminate the Abrasives</div>
+                        </div>
+                        <div class="sequence-event-description">
+                            <span only-show-to-message-actions="" class="only-show-to-message-actions" style="display: none;">
+                                <strong>1. Dry Dusting:</strong>Step 1: Eliminate the Abrasives.
+                            </span>
+                            <p>Before introducing any liquids, wipe the entire tub down.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sequence-event">
+                    <div hide-from-message-actions="" class="sequence-event-marker-container hide-from-message-actions">
+                        <div class="sequence-event-marker">2</div>
+                    </div>
+                    <div class="sequence-event-content">
+                        <div hide-from-message-actions="" class="hide-from-message-actions">
+                            <div class="sequence-event-title">The Lipid Varnish Attack</div>
+                        </div>
+                        <div class="sequence-event-description">
+                            <span only-show-to-message-actions="" class="only-show-to-message-actions" style="display: none;">
+                                <strong>2. The Lipid Varnish Attack:</strong>Step 2: 45-Minute Solvent Dwell.
+                            </span>
+                            <p>You must dissolve the oxidized, hardened layer of old body oils.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </sequence>
+    `);
+
+    // Nest the sequence element inside the paragraph programmatically to mirror live DOM
+    const paragraphElement = document.querySelector('p[data-path-to-node]');
+    const sequenceNode = document.importNode(sequenceDom.window.document.querySelector('sequence'), true);
+    paragraphElement.appendChild(sequenceNode);
+
+    loadContentScript(window);
+
+    const markdown = window.MarkdownCopy.htmlToMarkdown(paragraphElement);
+
+    const expected = [
+        '**1. Dry Dusting**',
+        '*Step 1: Eliminate the Abrasives*',
+        '',
+        'Before introducing any liquids, wipe the entire tub down.',
+        '',
+        '**2. The Lipid Varnish Attack**',
+        '*Step 2: 45-Minute Solvent Dwell*',
+        '',
+        'You must dissolve the oxidized, hardened layer of old body oils.'
+    ].join('\n');
+
+    assert.strictEqual(markdown, expected);
+});
+

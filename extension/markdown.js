@@ -56,6 +56,41 @@ function htmlToMarkdown(element) {
             return '';
         }
 
+        if (node.hasAttribute?.('hide-from-message-actions') || node.classList?.contains('hide-from-message-actions')) {
+            return '';
+        }
+
+        if (node.hasAttribute?.('only-show-to-message-actions') || node.classList?.contains('only-show-to-message-actions')) {
+            const strongNode = node.querySelector('strong, b');
+            if (strongNode) {
+                let titleText = normalizeInline(processNode(strongNode));
+                // Extract clean text inside strong tag, stripping asterisks and trailing colons
+                let cleanTitle = titleText.replace(/:?\*\*$/, '').replace(/^\*\*/, '').trim();
+                
+                // Clone node and remove strongNode to extract subtitle text
+                const cloned = node.cloneNode(true);
+                const clonedStrong = cloned.querySelector('strong, b');
+                if (clonedStrong) {
+                    clonedStrong.remove();
+                }
+                let subtitleText = normalizeInline(cloned.textContent).trim();
+                let cleanSubtitle = subtitleText.replace(/^\*+/, '').replace(/\*+$/, '').replace(/\.$/, '').trim();
+                
+                let markdown = '';
+                if (cleanTitle) {
+                    markdown += '**' + cleanTitle + '**\n';
+                }
+                if (cleanSubtitle) {
+                    markdown += '*' + cleanSubtitle + '*';
+                }
+                return markdown + '\n\n';
+            }
+            
+            const rawText = Array.from(node.childNodes).map(child => processNode(child, indent)).join('');
+            const text = rawText.replace(/(?<=[^\s*])\*\*(?=[a-zA-Z0-9])/g, '** ');
+            return normalizeInline(text) + '\n\n';
+        }
+
         const tag = node.tagName.toLowerCase();
         let result = '';
 
@@ -92,9 +127,15 @@ function htmlToMarkdown(element) {
             case 'h6':
                 result = '###### ' + normalizeInline(Array.from(node.childNodes).map(child => processNode(child, indent)).join('')) + '\n\n';
                 break;
-            case 'p':
-                result = normalizeInline(Array.from(node.childNodes).map(child => processNode(child, indent)).join('')) + '\n\n';
+            case 'p': {
+                const hasBlockChildren = node.querySelector('div, table, ul, ol, blockquote, pre, hr, h1, h2, h3, h4, h5, h6, sequence, structured-node-sequence, [only-show-to-message-actions], .only-show-to-message-actions') !== null;
+                if (hasBlockChildren) {
+                    result = Array.from(node.childNodes).map(child => processNode(child, indent)).join('') + '\n\n';
+                } else {
+                    result = normalizeInline(Array.from(node.childNodes).map(child => processNode(child, indent)).join('')) + '\n\n';
+                }
                 break;
+            }
             case 'strong':
             case 'b':
                 result = '**' + normalizeInline(Array.from(node.childNodes).map(child => processNode(child, indent)).join('')) + '**';
