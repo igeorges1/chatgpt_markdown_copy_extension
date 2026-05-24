@@ -12,6 +12,7 @@ const markdownPath = path.join(__dirname, '../extension/markdown.js');
 const selectorsPath = path.join(__dirname, '../extension/selectors.js');
 const i18nPath = path.join(__dirname, '../extension/i18n.js');
 const fixturePath = path.join(__dirname, '../fixtures/chatgpt20260419_long.html');
+const proFixturePath = path.join(__dirname, '../fixtures/chatgpt_pro_20260523.html');
 
 function loadContentScript(window) {
     const contentCode = fs.readFileSync(contentPath, 'utf8');
@@ -46,7 +47,12 @@ function loadContentScript(window) {
         Node: window.Node,
         chrome: mockChrome,
         globalThis: window,
+        navigator: window.navigator,
         console,
+        setTimeout,
+        clearTimeout,
+        setInterval,
+        clearInterval,
         MutationObserver: window.MutationObserver,
         history: window.history,
         location: window.location
@@ -162,4 +168,70 @@ test('Export handles missing conversation gracefully', () => {
 
     assert.ok(exportedMarkdown, 'Should return a message even for empty conversation');
     assert.match(exportedMarkdown, /No conversation found/i, 'Should indicate no conversation found');
+});
+
+test('Export Full Conversation works on chatgpt pro fixture', () => {
+    const html = fs.readFileSync(proFixturePath, 'utf8');
+    const dom = new JSDOM(html, {
+        url: 'https://chatgpt.com/'
+    });
+
+    loadContentScript(dom.window);
+    const exportedMarkdown = dom.window.exportConversation();
+
+    assert.ok(exportedMarkdown, 'Export should produce markdown content');
+    assert.ok(exportedMarkdown.length > 200, 'Export should produce markdown longer than 200 characters');
+    assert.match(exportedMarkdown, /\*\*User:\*\*/, 'Should contain user messages');
+    assert.match(exportedMarkdown, /\*\*AI:\*\*/, 'Should contain AI messages');
+    assert.match(
+        exportedMarkdown,
+        /最重要的能力不是“写代码”，而是“定义正确问题、提供正确上下文、验证正确结果”。/,
+        'Should include the required key sentence'
+    );
+    assert.doesNotMatch(exportedMarkdown, /<[^>]+>/, 'Should not contain raw HTML tags');
+});
+
+test('ChatGPT turn markdown copy button copies expected content on pro fixture', async () => {
+    const html = fs.readFileSync(proFixturePath, 'utf8');
+    const dom = new JSDOM(html, {
+        url: 'https://chatgpt.com/'
+    });
+
+    let copiedText = '';
+    Object.defineProperty(dom.window.navigator, 'clipboard', {
+        value: {
+            writeText: async (text) => {
+                copiedText = text;
+            }
+        },
+        configurable: true
+    });
+
+    loadContentScript(dom.window);
+
+    // Wait for debounced button injection in processExistingMessages()
+    await new Promise(resolve => setTimeout(resolve, 1600));
+
+    const markdownButtons = dom.window.document.querySelectorAll('[data-markdown-copy="true"]');
+    assert.ok(markdownButtons.length > 0, 'Should inject markdown copy buttons');
+
+    let successfulCopies = 0;
+    let foundRequiredSentence = false;
+
+    for (const markdownButton of markdownButtons) {
+        copiedText = '';
+        markdownButton.click();
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        if (!copiedText) continue;
+        successfulCopies++;
+        assert.doesNotMatch(copiedText, /<[^>]+>/, 'Copied markdown should not contain raw HTML tags');
+
+        if (copiedText.includes('最重要的能力不是“写代码”，而是“定义正确问题、提供正确上下文、验证正确结果”。')) {
+            foundRequiredSentence = true;
+        }
+    }
+
+    assert.ok(successfulCopies > 0, 'At least one markdown copy button should write markdown');
+    assert.ok(foundRequiredSentence, 'At least one copied markdown result should include the required key sentence');
 });
