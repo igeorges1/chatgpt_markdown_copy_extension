@@ -173,8 +173,23 @@ function addMarkdownCopyButton(buttonContainer, directCopyButton = null) {
         mdButton.appendChild(span);
 
     } else if (currentPlatform === 'gemini') {
-        mdButton.className = copyButton.className;
-        mdButton.setAttribute('mat-button', '');
+        const styleButton = copyButton.matches?.('gem-icon-button')
+            ? (copyButton.querySelector('button') || copyButton)
+            : copyButton;
+
+        mdButton.className = styleButton.className;
+        [
+            'mat-button',
+            'maticonbutton',
+            'mat-icon-button',
+            'matbadgeposition',
+            'mat-ripple-loader-class-name',
+            'mat-ripple-loader-centered'
+        ].forEach(attr => {
+            if (styleButton.hasAttribute(attr)) {
+                mdButton.setAttribute(attr, styleButton.getAttribute(attr));
+            }
+        });
         mdButton.setAttribute('tabindex', '0');
 
         const ripple = document.createElement('span');
