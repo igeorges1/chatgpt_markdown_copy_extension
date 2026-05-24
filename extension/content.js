@@ -214,10 +214,24 @@ function addMarkdownCopyButton(buttonContainer, directCopyButton = null) {
     mdButton.addEventListener('click', async () => {
         logDebug('on click');
         let markdownContent;
+        let markdownToCopy = '';
 
         if (currentPlatform === 'chatgpt') {
             const messageContainer = buttonContainer.closest(config.messageSelector);
-            markdownContent = messageContainer?.querySelector(config.contentSelector);
+            if (messageContainer) {
+                const assistantDivs = messageContainer.querySelectorAll('[data-message-author-role="assistant"]');
+                if (assistantDivs.length > 0) {
+                    const parts = [];
+                    assistantDivs.forEach(aiDiv => {
+                        const content = aiDiv.querySelector(config.contentSelector) || aiDiv.querySelector('.markdown') || aiDiv;
+                        const md = globalThis.MarkdownCopy.htmlToMarkdown(content).trim();
+                        if (md) parts.push(md);
+                    });
+                    markdownToCopy = parts.join('\n\n');
+                } else {
+                    markdownContent = messageContainer.querySelector(config.contentSelector);
+                }
+            }
         } else if (currentPlatform === 'gemini') {
             // Go up 4 levels then find previous sibling
             const contentDiv = buttonContainer.parentElement?.parentElement?.parentElement?.parentElement?.previousElementSibling;
@@ -228,9 +242,9 @@ function addMarkdownCopyButton(buttonContainer, directCopyButton = null) {
             }
         }
 
-        if (markdownContent) {
+        if (markdownToCopy || markdownContent) {
             try {
-                const markdown = globalThis.MarkdownCopy.htmlToMarkdown(markdownContent);
+                const markdown = markdownToCopy || globalThis.MarkdownCopy.htmlToMarkdown(markdownContent);
                 logDebug(markdown);
 
                 try {
@@ -371,19 +385,19 @@ function exportConversation() {
         const turns = document.querySelectorAll(config.messageSelector);
         turns.forEach(turn => {
             const userDiv = turn.querySelector('[data-message-author-role="user"]');
-            const aiDiv = turn.querySelector('[data-message-author-role="assistant"]');
+            const aiDivs = turn.querySelectorAll('[data-message-author-role="assistant"]');
 
             if (userDiv) {
                 const userText = (userDiv.innerText || userDiv.textContent || '').trim();
                 markdown += `${chrome.i18n.getMessage('userRole')}\n${userText}\n\n`;
             }
 
-            if (aiDiv) {
+            aiDivs.forEach(aiDiv => {
                 const content = aiDiv.querySelector('.markdown') || aiDiv;
                 markdown += `${chrome.i18n.getMessage('aiRole')}\n${globalThis.MarkdownCopy.htmlToMarkdown(content)}\n\n`;
-            }
+            });
 
-            if (userDiv || aiDiv) {
+            if (userDiv || aiDivs.length > 0) {
                 markdown += '---\n\n';
             }
         });
